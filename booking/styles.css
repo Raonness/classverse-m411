@@ -30,3 +30,21 @@
 #confirmSchedule:disabled{opacity:.47;cursor:not-allowed}
 @media(max-width:570px){.schedule-fields{grid-template-columns:1fr}.booking-scope{grid-template-columns:1fr 1fr}.schedule-actions{flex-direction:column}.schedule-actions>*{width:100%}}
 @media(prefers-reduced-motion:reduce){.scope-button,.my-booking-item,.schedule-preview{animation:none!important;transition:none!important}}
+
+
+/* Adaptive reservation dashboard, without changing seat IDs or booking logic */
+.shell,.intro>*,.workspace>*,.panel,.mode-left,.mode-right{min-width:0}
+.stage,.map-scroll{max-width:100%}
+.map-scroll{overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+.seat-grid{width:max(100%,565px)}
+.admin-tabs{-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.stat,.panel,.time-card{transition:border-color .24s ease,box-shadow .24s ease}
+.stat:hover,.panel:hover{border-color:#a8a4ef44}
+.seat:active:not(:disabled){transform:translateY(0) scale(.95)}
+:where(.scope-button,.admin-tabs button,.mode-choices button).active{transition:background-color .25s ease,border-color .25s ease,box-shadow .25s ease}
+@media(min-width:1600px){.shell{max-width:1540px}.workspace{grid-template-columns:minmax(0,1.7fr) minmax(355px,.8fr)}}
+@media(max-width:1024px){.workspace{grid-template-columns:minmax(0,1fr) minmax(295px,.8fr)}.stage{padding-inline:14px}.panel{padding:21px}}
+@media(max-width:880px){.workspace{grid-template-columns:minmax(0,1fr)}.intro{grid-template-columns:1fr}.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.stat{width:100%;flex:auto}.admin-dialog{width:min(100%,750px)}}
+@media(max-width:600px){.shell{padding-inline:clamp(12px,3.5vw,18px)}.intro{padding-top:28px}.hero-text h1{font-size:clamp(33px,9vw,43px)}.modebar{flex-wrap:wrap;gap:12px}.mode-right{margin-left:auto}.stats{gap:9px}.panel{padding:clamp(12px,3vw,18px)}.stage{padding:13px 7px}.map-scroll{padding:18px 3px 14px;scrollbar-width:thin}.seat-grid{min-width:565px}.seat{min-height:50px}.clock{justify-content:space-between;gap:clamp(2px,1vw,9px)}.clock-unit{min-width:0}.clock-unit strong{font-size:clamp(25px,7vw,36px)}.clock>b{font-size:clamp(20px,5vw,30px)}.time-lower{flex-wrap:wrap}.scrim{padding:10px;align-items:start}.dialog{max-height:calc(100dvh - 20px);padding:29px 16px}.admin-dialog{width:100%}.admin-heading{flex-wrap:wrap}.admin-tab{min-width:0}.admin-row{flex-wrap:wrap}.admin-row>div{min-width:0;overflow-wrap:anywhere}.admin-tabs button{min-height:44px}.mode-choices{grid-template-columns:1fr}.admin-data-grid{grid-template-columns:1fr 1fr}.roster-form{grid-template-columns:1fr}.roster-form>div{min-width:0}.admin-tab:has(.admin-seat-grid){overflow-x:auto}.admin-seat-grid{min-width:520px}.dialog-actions{flex-wrap:wrap;gap:9px}.dialog-actions button{flex:1 1 150px}.review-card{max-width:100%}:where(input,select,textarea){font-size:16px}}
+@media(max-width:385px){.stat{padding:11px 8px;gap:7px}.stat small{font-size:9px;white-space:normal}.stat-glyph{width:29px;height:29px;flex-shrink:0}.modebar{padding:13px 10px}.time-card{padding:18px 12px}.hero-chips{gap:6px}.hero-chips span{font-size:7px}.booking-scope{gap:5px}.scope-button{font-size:11px;padding:12px 7px}.admin-data-grid{grid-template-columns:1fr}.review-card{flex-wrap:wrap}.review-card>div:first-child{border-right:0;padding-right:0}}
+@media(max-height:500px) and (orientation:landscape){.intro{padding-block:20px}.time-card{min-height:0}.scrim{align-items:start}.dialog{max-height:calc(100dvh - 18px)}}
