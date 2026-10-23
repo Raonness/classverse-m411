@@ -49,7 +49,7 @@ function showRoster(){
     // When selecting a different student, don't accidentally retain the previous student's private profile.
     const same=occupants.find(x=>x.seat_id===$('editSeat').value);
     if(!same||Number(same.student_number)!==r.student_number){$('editNickname').value='';$('editBirthday').value=''}
-    closeRoster();$('editName').focus();
+    closeRoster();
   });
   list.append(option);
  }
