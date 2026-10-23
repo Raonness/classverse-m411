@@ -8,8 +8,8 @@ function updateView() {
   welcome.hidden = showMenu;
   menu.hidden = !showMenu;
   document.title = showMenu
-    ? "เมนูหลัก | ClassroomHub M.4/11"
-    : "ClassroomHub M.4/11 | ห้องเรียนของเรา";
+    ? "เมนูหลัก | ClassVerse M.4/11"
+    : "ClassVerse M.4/11 | ห้องเรียนของเรา";
   window.scrollTo({ top: 0, behavior: "instant" });
 }
 
