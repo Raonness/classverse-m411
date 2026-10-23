@@ -14,7 +14,7 @@
     dot.style.setProperty("--cv-y",(y-r.top)+"px");
     dot.style.setProperty("--cv-size",(Math.max(r.width,r.height)*2.1)+"px");
     // Respect CSS positioning used by the existing controls (especially close buttons).
-    if(getComputedStyle(target).position==="static")dot.style.position="absolute";
+    if(getComputedStyle(target).position==="static")target.classList.add("cv-pressable");
     target.append(dot);
     dot.addEventListener("animationend",()=>dot.remove(),{once:true});
   }
