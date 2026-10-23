@@ -1,7 +1,7 @@
 /* Shared, non-blocking motion system for ClassVerse pages. */
 :root{--cv-motion-ease:cubic-bezier(.2,.8,.2,1)}
 :where(button,a.main-action,a.live-card,.seat){-webkit-tap-highlight-color:transparent;touch-action:manipulation}
-:where(button:not(:disabled),a.main-action,a.live-card){transition-property:transform,background-color,border-color,box-shadow,filter;transition-duration:.23s;transition-timing-function:var(--cv-motion-ease)}
+:where(button:not(:disabled),a.main-action,a.live-card){transition-property:transform,background-color,border-color,box-shadow,filter,opacity;transition-duration:.23s;transition-timing-function:var(--cv-motion-ease)}
 :where(button:not(:disabled),a.main-action,a.live-card):active{transform:scale(.975);filter:brightness(1.09)}
 :where(button:not(:disabled),a.main-action,a.live-card):focus-visible{outline:3px solid #c9baff;outline-offset:3px}
 :where(button,input,select,textarea){transition:border-color .22s ease,box-shadow .22s ease,background-color .22s ease,filter .22s ease}
@@ -24,6 +24,7 @@
 .menu-screen:not([hidden]) .service-card:nth-child(4){animation-delay:.165s}
 .menu-screen:not([hidden]) .service-card:nth-child(5){animation-delay:.22s}
 .menu-screen:not([hidden]) .service-card:nth-child(6){animation-delay:.275s}
+.cv-status-change:not(:empty){animation:cv-notice-in .34s var(--cv-motion-ease)}
 :where(.notice,.connection,.status){transition:color .22s ease,background-color .22s ease,border-color .22s ease}
 :where(.scrim:not([hidden]) .dialog,.scrim:not([hidden]) .success-scene){will-change:transform,opacity}
 @media(pointer:coarse){:where(button,.main-action,.back-link){min-height:44px}}
