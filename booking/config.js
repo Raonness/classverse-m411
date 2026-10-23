@@ -1,6 +1,5 @@
-// เติมข้อมูลนี้เมื่อสร้างโปรเจกต์ Supabase แล้ว
-// ใส่ได้เฉพาะ publishable key หรือ anon key เท่านั้น; ห้ามใส่ service_role key
+// Public client configuration. Never place secret/service_role keys here.
 window.CLASSROOM_CONFIG = {
-  supabaseUrl: '',
-  supabaseAnonKey: ''
+  supabaseUrl: 'https://uazwviifldjdqthizkem.supabase.co',
+  supabaseAnonKey: 'sb_publishable_dH0spM9Y7turVOM6fhkaZg_yfYGnTdB'
 };
