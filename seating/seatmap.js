@@ -46,9 +46,11 @@ function showRoster(){
   option.addEventListener('pointerdown',event=>event.preventDefault());
   option.addEventListener('click',()=>{
     $('editName').value=r.student_name;$('editNo').value=r.student_number;
-    // When selecting a different student, don't accidentally retain the previous student's private profile.
-    const same=occupants.find(x=>x.seat_id===$('editSeat').value);
-    if(!same||Number(same.student_number)!==r.student_number){$('editNickname').value='';$('editBirthday').value=''}
+    // Keep the selected student's own private profile when choosing a new seat.
+    const existing=occupants.find(x=>Number(x.student_number)===r.student_number);
+    const privateProfile=existing?profiles.get(existing.seat_id):null;
+    $('editNickname').value=privateProfile?.nickname||existing?.nickname||'';
+    $('editBirthday').value=privateProfile?.birth_date||'';
     closeRoster();
   });
   list.append(option);
@@ -72,6 +74,9 @@ $('studentSuggestions').addEventListener('keydown',event=>{
 document.addEventListener('click',event=>{if(!event.target.closest('.roster-picker'))closeRoster()});
 
 $('editSeat').onchange=fillEditForm;
-$('assignForm').addEventListener('submit',async e=>{e.preventDefault();try{if(!profileSchemaReady)throw Error('กรุณารันไฟล์ seating/supabase/add-student-profiles.sql ใน Supabase ใหม่ก่อนบันทึก');const seat=$('editSeat').value;await rpc('seatmap_admin_assign_profile',{p_seat:seat,p_name:$('editName').value.trim(),p_number:$('editNo').value?Number($('editNo').value):null,p_nickname:$('editNickname').value.trim()||null,p_birthday:$('editBirthday').value||null});await refresh();await loadProfiles();$('editSeat').value=seat;fillEditForm();message('adminNotice','✓ บันทึกชื่อ–นามสกุล ชื่อเล่น และวันเกิดเรียบร้อยแล้ว')}catch(err){message('adminNotice','⚠ '+err.message)}});
+$('assignForm').addEventListener('submit',async e=>{e.preventDefault();try{if(!profileSchemaReady)throw Error('กรุณารันไฟล์ seating/supabase/add-student-profiles.sql ใน Supabase ใหม่ก่อนบันทึก');const seat=$('editSeat').value;const incoming=$('editName').value.trim();const incomingNo=$('editNo').value?Number($('editNo').value):null;const previous=occupants.find(x=>x.seat_id===seat);
+if(!incoming && previous && !confirm('ต้องการลบรายชื่อและข้อมูลเพิ่มเติมของที่นั่ง '+seat+' จริงหรือไม่?'))return;
+if(incoming && previous && previous.student_number!==incomingNo){throw Error('ที่นั่งนี้มีนักเรียนอยู่แล้ว กรุณาเลือกที่นั่งว่างหรือจัดการสลับที่นั่งผ่านคำขออนุมัติ')}
+await rpc('seatmap_admin_assign_profile',{p_seat:seat,p_name:$('editName').value.trim(),p_number:$('editNo').value?Number($('editNo').value):null,p_nickname:$('editNickname').value.trim()||null,p_birthday:$('editBirthday').value||null});await refresh();await loadProfiles();$('editSeat').value=seat;fillEditForm();message('adminNotice','✓ บันทึกชื่อ–นามสกุล ชื่อเล่น และวันเกิดเรียบร้อยแล้ว')}catch(err){message('adminNotice','⚠ '+err.message)}});
 async function loadRequests(){if(!admin)return;try{const requests=await rpc('seatmap_admin_requests');const root=$('requests');root.replaceChildren();if(!requests.length){root.textContent='ยังไม่มีคำขอรออนุมัติ';return}for(const r of requests){const div=document.createElement('div');div.className='admin-row';const info=document.createElement('div');const title=document.createElement('strong');title.textContent=`${r.requester_name} เลขที่ ${r.requester_number}: ${r.from_seat} ↔ ${r.to_seat}`;const small=document.createElement('small');small.textContent=r.reason||'ไม่ได้ระบุเหตุผล';info.append(title,small);const actions=document.createElement('div');actions.className='action-line';for(const [label,approve] of [['อนุมัติ',true],['ปฏิเสธ',false]]){const b=document.createElement('button');b.textContent=label;b.onclick=async()=>{if(approve&&!confirm('ยืนยันว่าตรวจสอบความยินยอมของนักเรียนทั้งสองฝ่ายแล้ว?'))return;try{await rpc('seatmap_admin_decide',{p_id:r.id,p_approve:approve});await refresh();await loadProfiles();await loadRequests();message('adminNotice',approve?'✓ อนุมัติและสลับที่นั่งแล้ว':'ปฏิเสธคำขอแล้ว')}catch(err){message('adminNotice','⚠ '+err.message)}};actions.append(b)}div.append(info,actions);root.append(div)}}catch(err){message('adminNotice','⚠ '+err.message)}}
 if(configured){db.channel('seatmap-updates').on('postgres_changes',{event:'*',schema:'public',table:'seatmap_seats'},()=>refresh()).subscribe();db.channel('seatmap-requests').on('postgres_changes',{event:'*',schema:'public',table:'seatmap_swap_requests'},()=>{if(admin)loadRequests()}).subscribe();refresh();setInterval(()=>{refresh();if(admin)loadRequests()},15000)}else{render();message('connection','ยังไม่ได้เชื่อมต่อฐานข้อมูล')}
