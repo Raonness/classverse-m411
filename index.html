@@ -1,4 +1,100 @@
 <!doctype html>
-<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ClassVerse | M.4/11</title><meta name="description" content="ClassVerse M.4/11 classroom portal"><style>
-:root{font-family:system-ui,"Noto Sans Thai",sans-serif;color:#f4f3ff;background:#0d1021}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 20% 20%,#29245a 0,transparent 48%),radial-gradient(ellipse at 85% 70%,#132e60 0,transparent 48%),#0d1021}main{width:min(100% - 32px,950px);margin:auto;min-height:100vh;display:flex;flex-direction:column}.top{display:flex;align-items:center;justify-content:space-between;padding:30px 0}.brand{font-size:1.35rem;font-weight:800;letter-spacing:.04em}.brand span{color:#aaa0ff}.small{color:#c4c4df}.screen{flex:1;display:flex;justify-content:center;flex-direction:column;align-items:center;text-align:center;padding:70px 0}.tag{border:1px solid #7770ae88;border-radius:99px;padding:9px 17px;color:#c6bdff;font-size:.85rem;letter-spacing:.15em}h1{font-size:clamp(2.2rem,7vw,4.5rem);line-height:1.25;margin:26px 0 14px}h1 span{color:#b2a6ff}p{color:#bfc1df;line-height:1.8}button,.action{font:inherit;border:0;cursor:pointer;background:linear-gradient(110deg,#9581ff,#616ee8);color:white;border-radius:15px;padding:14px 28px;font-weight:700;box-shadow:0 10px 35px #5b4ee344;text-decoration:none}.action{display:inline-block;margin-top:24px}button:focus-visible,a:focus-visible{outline:3px solid white;outline-offset:4px}.hidden{display:none}.head{text-align:center;padding:40px 0 25px}.head h2{font-size:clamp(1.7rem,4vw,2.5rem);margin:10px}.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;padding:0 0 40px}.tile{text-align:left;background:#ffffff0b;border:1px solid #ffffff21;border-radius:22px;padding:25px;min-height:185px;display:flex;flex-direction:column;color:white;text-decoration:none;transition:transform .2s,border-color .2s}.tile:not(.soon):hover{transform:translateY(-4px);border-color:#a89dff}.tile .num{color:#b6aaff;font-size:.8rem}.tile h3{font-size:1.3rem;margin:26px 0 4px}.tile p{font-size:.88rem;margin:0}.tile.soon{opacity:.46;cursor:not-allowed}.pill{float:right;color:#7de6bf;font-size:.7rem}.back{background:transparent;box-shadow:none;color:#c6c0f5;padding:8px 12px;margin:0 auto 30px}footer{text-align:center;color:#9292b5;padding:25px;font-size:.8rem}@media(max-width:560px){.tiles{grid-template-columns:1fr}.screen{padding:30px 0}.tile{min-height:155px}.tile h3{margin-top:18px}}
-</style></head><body><main><header class="top"><div class="brand">✦ Class<span>Verse</span></div><div class="small">M.4/11</div></header><section id="welcome" class="screen"><div class="tag">WELCOME TO OUR CLASSROOM</div><h1>ยินดีต้อนรับ<br><span>เข้าสู่ห้อง ม.4/11</span></h1><p>พื้นที่ของพวกเรา ที่รวมทุกเรื่องราวของห้องเรียนไว้ในที่เดียว</p><button id="start">เริ่มกันเลย →</button></section><section id="menu" class="hidden"><div class="head"><div class="tag">CLASSVERSE / MAIN MENU</div><h2>เลือกบริการที่ต้องการ</h2><p>เริ่มต้นการใช้งานผ่านเมนูด้านล่าง</p></div><div class="tiles"><a class="tile" href="./booking/"><div><span class="num">01 / RESERVATION</span><span class="pill">● OPEN</span></div><h3>Select and book ↗</h3><p>เลือกและจองที่นั่ง</p></a><a class="tile" href="./seating/"><div><span class="num">02 / SEATING MAP</span><span class="pill">● OPEN</span></div><h3>Class Room Map ↗</h3><p>ดูผังที่นั่งและยื่นคำขอสลับที่นั่ง</p></a><div class="tile soon" aria-disabled="true"><span class="num">03 / LOCKED</span><h3>Coming Soon 🔒</h3><p>ยังไม่เปิดใช้งาน</p></div><div class="tile soon" aria-disabled="true"><span class="num">04 / LOCKED</span><h3>Coming Soon 🔒</h3><p>ยังไม่เปิดใช้งาน</p></div><div class="tile soon" aria-disabled="true"><span class="num">05 / LOCKED</span><h3>Coming Soon 🔒</h3><p>ยังไม่เปิดใช้งาน</p></div><div class="tile soon" aria-disabled="true"><span class="num">06 / LOCKED</span><h3>Coming Soon 🔒</h3><p>ยังไม่เปิดใช้งาน</p></div></div><div style="text-align:center"><button class="back" id="back">← กลับหน้าแรก</button></div></section><footer>© ClassVerse M.4/11</footer></main><script>const welcome=document.querySelector("#welcome"),menu=document.querySelector("#menu");document.querySelector("#start").onclick=()=>{welcome.classList.add("hidden");menu.classList.remove("hidden")};document.querySelector("#back").onclick=()=>{menu.classList.add("hidden");welcome.classList.remove("hidden")};</script></body></html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0d1020">
+  <meta name="description" content="ClassroomHub M.4/11 — ศูนย์กลางเว็บไซต์ประจำห้องเรียน">
+  <title>ClassroomHub M.4/11 | ห้องเรียนของเรา</title>
+  <link rel="stylesheet" href="portal.css">
+  <script src="portal.js" defer></script>
+</head>
+<body>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="site-header frame">
+    <a href="#welcome" class="brand" aria-label="ClassroomHub กลับสู่หน้าต้อนรับ">
+      <span class="brand-mark" aria-hidden="true">✳</span>
+      <span class="brand-type">CLASSROOM<span>HUB</span><small>THE CLASS OF M.4/11</small></span>
+    </a>
+    <span class="header-label"><span class="online-dot" aria-hidden="true"></span> OUR CLASSROOM · 2026</span>
+  </header>
+
+  <main class="frame">
+    <section class="screen welcome-screen" id="welcome" aria-labelledby="welcome-heading">
+      <div class="welcome-copy">
+        <p class="eyebrow">✦ &nbsp; WELCOME TO OUR CLASSROOM <span aria-hidden="true" class="eyebrow-line"></span> 2026</p>
+        <p class="overline">พื้นที่เล็ก ๆ สำหรับเรื่องราวของพวกเรา</p>
+        <h1 id="welcome-heading">ยินดีต้อนรับ<br>เข้าสู่ห้อง <span class="gradient-text">ม.4/11<span class="accent">.</span></span></h1>
+        <p class="intro">เพราะทุกที่นั่งมีเรื่องราวของตัวเอง ยินดีต้อนรับสู่ศูนย์กลางออนไลน์ของห้องเรียนเรา</p>
+        <a class="main-action" href="#menu">เริ่มกันเลย <span class="arrow" aria-hidden="true">↗</span></a>
+        <p class="soft-note">YOUR CLASS. YOUR SPACE. YOUR MOMENTS.</p>
+      </div>
+      <div class="visual-side" aria-hidden="true">
+        <div class="orbit orbit-outer"></div>
+        <div class="orbit orbit-inner"></div>
+        <div class="glow-back"></div>
+        <div class="feature-card">
+          <span class="feature-top">✳ CLASSROOM IDENTITY</span>
+          <div class="feature-grade">M<span>.</span>4<span>/</span>11</div>
+          <div class="feature-bar"></div>
+          <div class="feature-bottom"><span>WE ARE ONE CLASS</span><span>EST. 2026</span></div>
+        </div>
+        <span class="float-star star-a">✦</span><span class="float-star star-b">✳</span>
+      </div>
+    </section>
+
+    <section class="screen menu-screen" id="menu" aria-labelledby="menu-heading" hidden>
+      <div class="menu-heading-wrap">
+        <button class="back-link" id="backBtn" type="button"><span aria-hidden="true">←</span> กลับหน้าต้อนรับ</button>
+        <p class="eyebrow">✦ &nbsp; EXPLORE YOUR CLASSROOM <span class="eyebrow-line" aria-hidden="true"></span> M.4/11</p>
+        <h1 id="menu-heading">เลือกสิ่งที่คุณ<br><span class="gradient-text">อยากทำวันนี้<span class="accent">.</span></span></h1>
+        <p class="intro">ยินดีต้อนรับสู่ศูนย์รวมบริการของห้อง ม.4/11 เลือกเมนูที่ต้องการเพื่อเริ่มใช้งานได้เลย</p>
+      </div>
+      <div class="service-grid" aria-label="เมนูห้องเรียนทั้งหมด 6 รายการ">
+        <a class="service-card live-card" href="./booking/" aria-label="Select and book เปิดใช้งานได้">
+          <span class="card-top"><span class="service-icon purple" aria-hidden="true">▦</span><span class="status available"><span class="status-dot" aria-hidden="true"></span> OPEN</span></span>
+          <span class="card-num">01 / RESERVATION</span>
+          <strong>Select and book</strong>
+          <span class="card-description">เปิดระบบจองที่นั่ง เลือกตำแหน่งที่คุณต้องการตามรอบที่กำหนด</span>
+          <span class="card-foot">เข้าสู่ระบบเลือกที่นั่ง <span aria-hidden="true">↗</span></span>
+        </a>
+        <a class="service-card live-card" href="./seating/" aria-label="Class Room Map เปิดใช้งานได้">
+          <span class="card-top"><span class="service-icon teal" aria-hidden="true">♧</span><span class="status available"><span class="status-dot" aria-hidden="true"></span> OPEN</span></span>
+          <span class="card-num">02 / SEATING MAP</span>
+          <strong>Class Room Map</strong>
+          <span class="card-description">ตรวจสอบผังที่นั่งของเพื่อน ๆ และยื่นคำขอสลับที่นั่งเพื่อรอแอดมินอนุมัติ</span>
+          <span class="card-foot">เข้าสู่ผังที่นั่ง <span aria-hidden="true">↗</span></span>
+        </a>
+        <div class="service-card locked-card" aria-label="เมนู 3 เร็ว ๆ นี้">
+          <span class="card-top"><span class="service-icon quiet" aria-hidden="true">✧</span><span class="status soon">SOON</span></span>
+          <span class="card-num">03 / COMING SOON</span>
+          <strong>Coming Soon</strong><span class="card-description">กำลังเตรียมพื้นที่สำหรับบริการใหม่ของห้องเรียน</span>
+          <span class="card-foot muted">ยังไม่เปิดให้ใช้งาน <span aria-hidden="true">⌁</span></span>
+        </div>
+        <div class="service-card locked-card" aria-label="เมนู 4 เร็ว ๆ นี้">
+          <span class="card-top"><span class="service-icon quiet" aria-hidden="true">◇</span><span class="status soon">SOON</span></span>
+          <span class="card-num">04 / COMING SOON</span>
+          <strong>Coming Soon</strong><span class="card-description">กำลังเตรียมพื้นที่สำหรับบริการใหม่ของห้องเรียน</span>
+          <span class="card-foot muted">ยังไม่เปิดให้ใช้งาน <span aria-hidden="true">⌁</span></span>
+        </div>
+        <div class="service-card locked-card" aria-label="เมนู 5 เร็ว ๆ นี้">
+          <span class="card-top"><span class="service-icon quiet" aria-hidden="true">✺</span><span class="status soon">SOON</span></span>
+          <span class="card-num">05 / COMING SOON</span>
+          <strong>Coming Soon</strong><span class="card-description">กำลังเตรียมพื้นที่สำหรับบริการใหม่ของห้องเรียน</span>
+          <span class="card-foot muted">ยังไม่เปิดให้ใช้งาน <span aria-hidden="true">⌁</span></span>
+        </div>
+        <div class="service-card locked-card" aria-label="เมนู 6 เร็ว ๆ นี้">
+          <span class="card-top"><span class="service-icon quiet" aria-hidden="true">◌</span><span class="status soon">SOON</span></span>
+          <span class="card-num">06 / COMING SOON</span>
+          <strong>Coming Soon</strong><span class="card-description">กำลังเตรียมพื้นที่สำหรับบริการใหม่ของห้องเรียน</span>
+          <span class="card-foot muted">ยังไม่เปิดให้ใช้งาน <span aria-hidden="true">⌁</span></span>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer frame"><span>✳ CLASSROOMHUB <span class="footer-accent">M.4/11</span></span><span>MADE FOR OUR CLASS · 2026</span></footer>
+</body>
+</html>
