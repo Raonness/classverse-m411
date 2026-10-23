@@ -32,3 +32,23 @@
  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
  .cv-ripple{display:none!important}
 }
+
+/* Route transition and safe back navigation */
+.cv-back-button{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;border:1px solid #c2bafa4d;border-radius:12px;padding:10px 16px;background:#aaa1ff18;color:#e3dfff;font-size:13px;font-weight:600;text-decoration:none;cursor:pointer;white-space:nowrap;transition:background-color .2s ease,border-color .2s ease,transform .2s ease}
+.cv-back-button:hover{background:#a69cfa36;border-color:#c6b9ff9c;transform:translateX(-3px)}
+.cv-back-button:active{transform:scale(.97)}
+.cv-back-button .cv-back-icon{font-size:20px;line-height:1}
+.cv-top-navigation{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-block:14px;min-width:0}
+.cv-transition-overlay{position:fixed;z-index:2147483000;inset:0;display:grid;place-items:center;pointer-events:none;background:rgba(12,15,33,.96);opacity:0;visibility:hidden;transition:opacity .27s cubic-bezier(.2,.8,.2,1),visibility .27s;isolation:isolate}
+.cv-transition-overlay.cv-visible{opacity:1;visibility:visible;pointer-events:auto}
+.cv-transition-overlay-inner{display:flex;flex-direction:column;align-items:center;gap:17px;transform:translateY(14px) scale(.96);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.cv-transition-overlay.cv-visible .cv-transition-overlay-inner{transform:translateY(0) scale(1)}
+.cv-loader-orbit{position:relative;display:grid;place-items:center;width:88px;height:88px;border-radius:25px;background:linear-gradient(140deg,#3d3571,#222a4b);border:1px solid #bdb1ff77;box-shadow:0 0 65px #a196ff29;color:#e5dbff;font-size:42px}
+.cv-loader-orbit:after{content:"";position:absolute;inset:-9px;border:2px solid transparent;border-top-color:#ad9cff;border-right-color:#81d9dc;border-radius:32px;animation:cv-loader-spin 1.2s linear infinite}
+.cv-loader-label{font:600 13px 'Kanit',sans-serif;letter-spacing:.08em;color:#d0cafa}
+.cv-loader-sub{font:400 11px 'Kanit',sans-serif;color:#939bbb}
+@keyframes cv-loader-spin{to{transform:rotate(360deg)}}
+.cv-page-enter{animation:cv-page-enter .38s cubic-bezier(.2,.8,.2,1) both}
+@keyframes cv-page-enter{from{opacity:.55;filter:blur(3px);transform:translateY(8px)}to{opacity:1;filter:blur(0);transform:none}}
+@media(max-width:550px){.cv-top-navigation{padding-block:10px}.cv-back-button{padding:9px 12px;font-size:12px;border-radius:10px}}
+@media(prefers-reduced-motion:reduce){.cv-transition-overlay,.cv-transition-overlay-inner{transition:none!important}.cv-loader-orbit:after{animation:none!important}.cv-page-enter{animation:none!important}}
