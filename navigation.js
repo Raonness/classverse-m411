@@ -1,7 +1,7 @@
 "use strict";
 /* Shared transition and back navigation. Does not read or change booking records. */
 (()=>{
-  const prefersReduced=window.matchMedia("(prefers-reduced-motion: reduce)");
+  const prefersReduced=window.matchMedia("(prefers-reduced-motion: reduce");
   const portalPath="/classverse-m411/";
   const portalMenu=portalPath+"#menu";
   const current=()=>window.location.pathname;
@@ -53,6 +53,14 @@
     navigate(portalMenu);
   }
 
+  function loadSeatingFinder(){
+    if(!current().startsWith(portalPath+"seating/")||document.querySelector('script[data-seating-finder]'))return;
+    const script=document.createElement("script");
+    script.src="swap-finder.js?v=20261023finder1";
+    script.dataset.seatingFinder="true";
+    document.body.append(script);
+  }
+
   function setup(){
     // First visual load animation; skipped for users with reduced motion.
     if(!prefersReduced.matches){
@@ -74,6 +82,7 @@
       e.preventDefault();
       navigate(url.href);
     });
+    loadSeatingFinder();
   }
 
   // BFCache: never leave a transition overlay blocking a restored screen.
