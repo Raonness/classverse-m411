@@ -42,5 +42,23 @@
       observer.observe(el,{childList:true,characterData:true,subtree:true});
     }
   }
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",setupCounters,{once:true});else setupCounters();
+  function setupStatusAnimations(){
+    if(typeof MutationObserver==="undefined")return;
+    const elements=new Set(document.querySelectorAll(".notice, [role='status'], .connection"));
+    for(const el of elements){
+      let previous=el.textContent.trim();
+      const observer=new MutationObserver(()=>{
+        const next=el.textContent.trim();
+        if(next===previous)return;
+        previous=next;
+        if(reduce.matches||!next)return;
+        el.classList.remove("cv-status-change");
+        void el.offsetWidth;
+        el.classList.add("cv-status-change");
+      });
+      observer.observe(el,{childList:true,characterData:true,subtree:true});
+    }
+  }
+  function setupMotion(){setupCounters();setupStatusAnimations()}
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",setupMotion,{once:true});else setupMotion();
 })();
