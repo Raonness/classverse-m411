@@ -19,3 +19,9 @@
 @media(max-width:700px){.shell{padding-inline:clamp(12px,3.5vw,18px)}.topbar{min-height:75px;height:auto;padding-block:12px;gap:10px}.topbar-right{gap:7px}.topbar-right .ghost{padding:10px}.intro{padding-top:28px}.hero-text h1{font-size:clamp(34px,9vw,44px)}.stats{gap:8px}.stat{padding:11px 9px;gap:6px}.stat-glyph{width:30px;height:30px;flex-shrink:0;font-size:18px}.stat strong{font-size:clamp(17px,4vw,23px)}.stat small{font-size:10px;white-space:normal}.panel{padding:clamp(12px,3.5vw,18px)}.stage{padding:12px 7px}.map-scroll{padding:18px 5px}.seat-grid{min-width:630px}.seat{min-height:52px}.booking-panel :where(input,select){font-size:16px}.scrim{padding:10px;align-items:start}.dialog{max-height:calc(100dvh - 20px);padding:28px 16px}.admin-heading{flex-wrap:wrap}.admin-row{flex-direction:column;align-items:stretch}.admin-row .action-line{width:100%;display:grid;grid-template-columns:1fr 1fr}.admin-row .action-line button{min-height:44px}.summary strong{font-size:clamp(48px,12vw,70px)}}
 @media(max-width:390px){.brand{font-size:12px}.brand-symbol{width:38px;height:38px;flex-shrink:0}.topbar-right .connection{display:none}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stats .stat:last-child{grid-column:1/-1}.hero-chips{gap:6px}.hero-chips span{font-size:8px}.stage-bottom span:nth-child(2){display:none}}
 @media(max-height:500px) and (orientation:landscape){.intro{padding:16px 0}.dialog{max-height:calc(100dvh - 16px)}}
+
+/* The 40-seat map keeps its real geometry and scrolls accessibly on small displays. */
+.map-scroll:focus-visible{outline:2px solid #bdadff;outline-offset:2px;border-radius:10px}
+.map-swipe-tip{display:none;color:#aeb9e0;font-size:11px;text-align:center;margin:9px 0 0;line-height:1.5}
+@media(max-width:850px){.map-swipe-tip{display:block}}
+@media(prefers-reduced-motion:reduce){.seat.cv-seat-clicked,.pass-seat.cv-selection-change{animation:none!important}}
