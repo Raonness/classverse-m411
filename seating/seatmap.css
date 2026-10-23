@@ -5,7 +5,8 @@
 .stage,.map-scroll{max-width:100%}
 .map-scroll{overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
 .seat-grid{width:max(100%,630px)}
-.seat.is-selected{border-color:#dac8ff!important;background:linear-gradient(145deg,#6550a0,#493a79)!important;color:#fff!important;box-shadow:0 0 0 3px #b59afe42,0 8px 22px #7c60d84a!important;animation:cv-seat-select .32s cubic-bezier(.2,.85,.2,1)}
+.seat.is-selected{border-color:#dac8ff!important;background:linear-gradient(145deg,#6550a0,#493a79)!important;color:#fff!important;box-shadow:0 0 0 3px #b59afe42,0 8px 22px #7c60d84a!important;}
+.seat.cv-seat-clicked{animation:cv-seat-select .32s cubic-bezier(.2,.85,.2,1)}
 .seat:active{transform:scale(.94)}
 .reservation-pass{transition:border-color .25s ease,box-shadow .25s ease}
 .pass-seat.cv-selection-change{animation:cv-seat-select .35s cubic-bezier(.2,.85,.2,1)}
