@@ -25,3 +25,11 @@
 .map-swipe-tip{display:none;color:#aeb9e0;font-size:11px;text-align:center;margin:9px 0 0;line-height:1.5}
 @media(max-width:850px){.map-swipe-tip{display:block}}
 @media(prefers-reduced-motion:reduce){.seat.cv-seat-clicked,.pass-seat.cv-selection-change{animation:none!important}}
+
+/* Student profile editor: admin-only fields */
+.student-profile-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:end}
+.student-profile-fields>div{min-width:0}
+.student-profile-fields input{width:100%;min-height:44px;color-scheme:dark}
+.student-profile-fields input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.85);cursor:pointer}
+.admin-dialog .student-profile-fields+ .admin-tip{margin:13px 0 4px;line-height:1.65}
+@media(max-width:600px){.student-profile-fields{grid-template-columns:1fr;gap:4px}.student-profile-fields input{font-size:16px}}
