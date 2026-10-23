@@ -33,3 +33,14 @@
 .student-profile-fields input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.85);cursor:pointer}
 .admin-dialog .student-profile-fields+ .admin-tip{margin:13px 0 4px;line-height:1.65}
 @media(max-width:600px){.student-profile-fields{grid-template-columns:1fr;gap:4px}.student-profile-fields input{font-size:16px}}
+
+/* Private admin-only student roster autocomplete */
+.roster-picker{position:relative;min-width:0}
+.roster-picker>input{width:100%}
+.roster-suggestions{position:relative;z-index:5;margin-top:6px;border:1px solid #afa2f175;background:#252542;border-radius:12px;max-height:270px;overflow-y:auto;box-shadow:0 15px 35px #08081666;padding:5px}
+.roster-suggestions[hidden]{display:none!important}
+.roster-option{display:flex;align-items:center;gap:11px;width:100%;min-height:43px;text-align:left;background:transparent;border:0;border-radius:8px;padding:8px 10px;color:#f2efff;cursor:pointer;transition:background .18s ease,transform .18s ease}
+.roster-option:hover,.roster-option:focus-visible{background:#9c8dff30;outline:2px solid #cbb9ff;outline-offset:-2px}
+.roster-num{font-size:11px;white-space:nowrap;flex-shrink:0;background:#9484ff30;color:#dbd4ff;padding:5px 7px;border-radius:6px}
+.roster-hint{font-size:11px!important;color:#bdc3df!important;margin:7px 0 10px!important;line-height:1.6}
+@media(max-width:650px){.roster-suggestions{max-height:min(38dvh,280px)}.roster-option{min-height:47px}.roster-hint{font-size:11px!important}}
