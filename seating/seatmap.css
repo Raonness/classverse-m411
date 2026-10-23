@@ -1,1 +1,20 @@
 .summary{display:flex;align-items:baseline;gap:12px;margin:18px 0}.summary strong{font-size:70px;color:#c7b8ff}.summary span,.time-card p{color:#aeb5d1;font-size:13px}.booking-panel label,.admin-dialog label{display:block;color:#bdc4e3;font-size:12px;margin:13px 0 6px}.booking-panel input,.booking-panel select,.admin-dialog input,.admin-dialog select{width:100%;background:#ffffff0c;color:#fff;border:1px solid #ffffff30;border-radius:12px;padding:13px}.booking-panel select option,.admin-dialog select option{background:#24243b;color:#fff}.booking-panel form button,.admin-dialog form button{margin-top:18px}.seat small{font-size:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}.seat.is-booked{cursor:pointer}.admin-row{flex-wrap:wrap}.admin-row .action-line{margin:0}.admin-row button{cursor:pointer}.notice{margin-top:15px;line-height:1.7}.seat{min-width:0}.pass-bottom strong{font-size:14px;overflow-wrap:anywhere}@media(max-width:700px){.shell{padding-left:15px;padding-right:15px}.intro{padding:32px 0;gap:18px}.workspace{grid-template-columns:1fr}.panel{padding:14px}.stats{gap:5px}.stat{padding:10px;gap:7px}.stat strong{font-size:20px}.stage{padding:10px}.seat-grid{min-width:630px}.map-scroll{overflow-x:auto}}
+
+/* Device-adaptive classroom seating directory and admin controls */
+.shell,.intro>*,.workspace>*,.panel,.mode-left{min-width:0}
+.stage,.map-scroll{max-width:100%}
+.map-scroll{overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.seat-grid{width:max(100%,630px)}
+.seat.is-selected{border-color:#dac8ff!important;background:linear-gradient(145deg,#6550a0,#493a79)!important;color:#fff!important;box-shadow:0 0 0 3px #b59afe42,0 8px 22px #7c60d84a!important;animation:cv-seat-select .32s cubic-bezier(.2,.85,.2,1)}
+.seat:active{transform:scale(.94)}
+.reservation-pass{transition:border-color .25s ease,box-shadow .25s ease}
+.pass-seat.cv-selection-change{animation:cv-seat-select .35s cubic-bezier(.2,.85,.2,1)}
+@keyframes cv-seat-select{from{transform:scale(.88);opacity:.65}to{transform:scale(1);opacity:1}}
+.admin-row,.stat,.panel{transition:border-color .24s ease,background-color .24s ease}
+.admin-row:hover,.stat:hover{border-color:#b5a6fc59}
+@media(min-width:1600px){.shell{max-width:1550px}}
+@media(max-width:1024px){.workspace{grid-template-columns:minmax(0,1fr) minmax(300px,.8fr)}.panel{padding:21px}}
+@media(max-width:880px){.workspace,.intro{grid-template-columns:1fr}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.stat{width:100%;flex:auto}.time-card{max-width:100%}}
+@media(max-width:700px){.shell{padding-inline:clamp(12px,3.5vw,18px)}.topbar{min-height:75px;height:auto;padding-block:12px;gap:10px}.topbar-right{gap:7px}.topbar-right .ghost{padding:10px}.intro{padding-top:28px}.hero-text h1{font-size:clamp(34px,9vw,44px)}.stats{gap:8px}.stat{padding:11px 9px;gap:6px}.stat-glyph{width:30px;height:30px;flex-shrink:0;font-size:18px}.stat strong{font-size:clamp(17px,4vw,23px)}.stat small{font-size:10px;white-space:normal}.panel{padding:clamp(12px,3.5vw,18px)}.stage{padding:12px 7px}.map-scroll{padding:18px 5px}.seat-grid{min-width:630px}.seat{min-height:52px}.booking-panel :where(input,select){font-size:16px}.scrim{padding:10px;align-items:start}.dialog{max-height:calc(100dvh - 20px);padding:28px 16px}.admin-heading{flex-wrap:wrap}.admin-row{flex-direction:column;align-items:stretch}.admin-row .action-line{width:100%;display:grid;grid-template-columns:1fr 1fr}.admin-row .action-line button{min-height:44px}.summary strong{font-size:clamp(48px,12vw,70px)}}
+@media(max-width:390px){.brand{font-size:12px}.brand-symbol{width:38px;height:38px;flex-shrink:0}.topbar-right .connection{display:none}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stats .stat:last-child{grid-column:1/-1}.hero-chips{gap:6px}.hero-chips span{font-size:8px}.stage-bottom span:nth-child(2){display:none}}
+@media(max-height:500px) and (orientation:landscape){.intro{padding:16px 0}.dialog{max-height:calc(100dvh - 16px)}}
