@@ -1,7 +1,7 @@
 "use strict";
 /* Shared transition and back navigation. Does not read or change booking records. */
 (()=>{
-  const prefersReduced=window.matchMedia("(prefers-reduced-motion: reduce");
+  const prefersReduced=window.matchMedia("(prefers-reduced-motion: reduce)");
   const portalPath="/classverse-m411/";
   const portalMenu=portalPath+"#menu";
   const current=()=>window.location.pathname;
