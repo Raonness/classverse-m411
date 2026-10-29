@@ -59,6 +59,28 @@
       observer.observe(el,{childList:true,characterData:true,subtree:true});
     }
   }
-  function setupMotion(){setupCounters();setupStatusAnimations()}
+  function setupPendingButtons(){
+    if(typeof MutationObserver==="undefined")return;
+    const pending=/กำลัง\s*(?:ยืนยัน|โหลด|บันทึก|ส่ง|ดำเนินการ)|\b(?:loading|processing)\b/i;
+    const watch=button=>{
+      const update=()=>{
+        const isPending=pending.test(button.textContent.trim());
+        button.classList.toggle("cv-button-loading",isPending);
+        if(isPending)button.setAttribute("aria-busy","true");
+        else button.removeAttribute("aria-busy");
+      };
+      update();
+      new MutationObserver(update).observe(button,{childList:true,characterData:true,subtree:true});
+    };
+    document.querySelectorAll("button").forEach(watch);
+    new MutationObserver(records=>{
+      for(const record of records)for(const node of record.addedNodes){
+        if(!(node instanceof Element))continue;
+        if(node.matches("button"))watch(node);
+        node.querySelectorAll?.("button").forEach(watch);
+      }
+    }).observe(document.body,{childList:true,subtree:true});
+  }
+  function setupMotion(){setupCounters();setupStatusAnimations();setupPendingButtons()}
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",setupMotion,{once:true});else setupMotion();
 })();
