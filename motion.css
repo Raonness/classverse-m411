@@ -52,3 +52,29 @@
 @keyframes cv-page-enter{from{opacity:.55;filter:blur(3px);transform:translateY(8px)}to{opacity:1;filter:blur(0);transform:none}}
 @media(max-width:550px){.cv-top-navigation{padding-block:10px}.cv-back-button{padding:9px 12px;font-size:12px;border-radius:10px}}
 @media(prefers-reduced-motion:reduce){.cv-transition-overlay,.cv-transition-overlay-inner{transition:none!important}.cv-loader-orbit:after{animation:none!important}.cv-page-enter{animation:none!important}}
+
+
+/* Craft pass: tactile feedback, dialog motion, and honest pending states. */
+:where(.service-card,.feature-card,.time-card,.panel,.stat,.seat,.admin-row,.audit-item){transform-origin:center;backface-visibility:hidden}
+:where(.live-card,.service-card,.time-card,.panel,.stat){transition:transform .28s var(--cv-motion-ease),border-color .28s ease,box-shadow .28s ease,background-color .28s ease}
+.live-card:hover{transform:translateY(-4px)}
+:where(.seat:not(:disabled),.roster-option,.admin-row button,.scope-button):active{transform:scale(.97)}
+.seat{transition:transform .2s var(--cv-motion-ease),border-color .22s ease,background-color .22s ease,box-shadow .22s ease,filter .22s ease}
+.seat.is-selected{animation:cv-selection-arrive .3s var(--cv-motion-ease)}
+@keyframes cv-selection-arrive{0%{transform:scale(.9);filter:brightness(1.2)}65%{transform:scale(1.035)}100%{transform:scale(1);filter:none}}
+:where(.scrim:not([hidden]),.overlay:not([hidden])){animation:cv-backdrop-in .22s ease-out both}
+:where(.scrim:not([hidden]) .dialog,.overlay:not([hidden]) .dialog){animation:cv-dialog-in .32s var(--cv-motion-ease) both;transform-origin:50% 42%}
+@keyframes cv-backdrop-in{from{opacity:0}to{opacity:1}}
+@keyframes cv-dialog-in{from{opacity:0;transform:translateY(12px) scale(.975);filter:blur(2px)}to{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
+.cv-button-loading{position:relative;pointer-events:none}
+.cv-button-loading::before{content:"";display:inline-block;width:.82em;height:.82em;margin-right:.55em;vertical-align:-.08em;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:cv-loader-spin .7s linear infinite}
+.cv-button-loading:disabled{opacity:.82;filter:none}
+:where(.notice,.admin-list,.audit-log,.my-bookings,.roster-suggestions){overflow-wrap:anywhere}
+:where(input,select,textarea):focus{border-color:#b9aaff!important}
+@media(hover:hover) and (pointer:fine){.seat:not(:disabled):hover{transform:translateY(-2px);filter:brightness(1.08)}}
+@media(prefers-reduced-motion:reduce){
+ .live-card:hover,.seat:not(:disabled):hover{transform:none!important}
+ .seat.is-selected{animation:none!important}
+ :where(.scrim:not([hidden]),.overlay:not([hidden])),:where(.scrim:not([hidden]) .dialog,.overlay:not([hidden]) .dialog){animation:none!important}
+ .cv-button-loading::before{animation:none!important}
+}
