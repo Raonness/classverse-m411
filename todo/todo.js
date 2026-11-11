@@ -1,241 +1,88 @@
 "use strict";
 (() => {
-  const config = window.CLASSROOM_CONFIG || {};
-  const client = window.supabase?.createClient(config.supabaseUrl, config.supabaseAnonKey);
+  const cfg = window.CLASSROOM_CONFIG || {};
+  const db = window.supabase?.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
   const $ = (id) => document.getElementById(id);
-  const grid = $("taskGrid");
-  const filterButtons = [...document.querySelectorAll(".filter")];
-  let tasks = [];
-  let activeFilter = "all";
-  let currentUser = null;
-  let isAdmin = false;
-
   const labels = { announcement: "ประกาศ", activity: "กิจกรรม", homework: "การบ้าน" };
-  const escapeHTML = (value = "") => String(value).replace(/[&<>"']/g, (char) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-  }[char]));
-  const dateLabel = (value) => {
-    if (!value) return "ไม่ระบุกำหนดการ";
-    const date = new Date(value + (value.length === 10 ? "T00:00:00" : ""));
-    return new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "short", year: "numeric" }).format(date);
-  };
-  const notice = (element, text, error = false) => {
-    element.textContent = text;
-    element.style.color = error ? "#e5b5b5" : "#d2baf1";
-  };
+  let records = [], user = null, admin = false, filter = "all";
+  const esc = (v = "") => String(v).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const say = (el, msg, error = false) => { el.textContent = msg; el.style.color = error ? "#e5b5b5" : "#d2baf1"; };
+  const dateText = (value) => value ? new Intl.DateTimeFormat("th-TH",{day:"numeric",month:"short",year:"numeric"}).format(new Date(value+"T00:00:00")) : "ไม่ระบุกำหนดวัน";
 
-  async function checkAdmin(user) {
-    if (!user || !client) return false;
-    const { data, error } = await client.from("classroom_admins").select("user_id").eq("user_id", user.id).maybeSingle();
-    if (error) console.warn("Admin role lookup:", error.message);
-    return Boolean(data);
+  // Use the existing server-verified seatmap admin RPC; task privileges are separately enforced by RLS.
+  async function isAuthorizedAdmin(sessionUser) {
+    if (!sessionUser || !db) return false;
+    const { error } = await db.rpc("seatmap_admin_requests");
+    return !error;
   }
 
-  async function loadTasks() {
-    if (!client) {
-      grid.innerHTML = '<div class="empty-card"><strong>ยังไม่ได้ตั้งค่าการเชื่อมต่อ</strong><span>ตรวจสอบไฟล์ config.js ของระบบ</span></div>';
-      $("boardCount").textContent = "ไม่สามารถเชื่อมต่อ";
-      return;
-    }
-    grid.innerHTML = '<div class="loading-card"><span class="loader"></span><p>กำลังโหลดรายการ…</p></div>';
-    // RLS returns only public tasks plus private tasks assigned to the signed-in email.
-    const { data, error } = await client.from("class_tasks").select("*").order("due_date", { ascending: true, nullsFirst: false }).order("created_at", { ascending: false });
-    if (error) {
-      console.error(error);
-      grid.innerHTML = '<div class="empty-card"><strong>โหลดรายการไม่สำเร็จ</strong><span>โปรดตรวจสอบการตั้งค่าฐานข้อมูล To-Do</span></div>';
-      $("boardCount").textContent = "เกิดข้อผิดพลาด";
-      return;
-    }
-    tasks = data || [];
-    renderTasks();
-    if (isAdmin) renderManageList();
+  async function refreshTasks() {
+    if (!db) { $("taskGrid").innerHTML = '<div class="empty-card"><strong>ยังไม่ได้เชื่อมต่อฐานข้อมูล</strong><span>โปรดตรวจสอบ config ของ Supabase</span></div>'; return; }
+    $("taskGrid").innerHTML = '<div class="loading-card"><span class="loader"></span><p>กำลังโหลดรายการ…</p></div>';
+    const { data, error } = await db.from("class_tasks").select("*").order("due_date",{ascending:true,nullsFirst:false}).order("created_at",{ascending:false});
+    if (error) { console.error(error); $("taskGrid").innerHTML = '<div class="empty-card"><strong>โหลดรายการไม่สำเร็จ</strong><span>ตรวจสอบการติดตั้ง To-Do SQL และสิทธิ์ Data API</span></div>'; $("boardCount").textContent="เกิดข้อผิดพลาด"; return; }
+    records = data || []; render(); if (admin) renderAdminList();
   }
 
-  function visibleTasks() {
+  function filtered() {
     const query = $("searchInput").value.trim().toLowerCase();
-    return tasks.filter((task) => {
-      if (activeFilter === "private" && task.audience !== "private") return false;
-      if (["announcement", "activity", "homework"].includes(activeFilter) && task.task_type !== activeFilter) return false;
-      if (query && ![task.title, task.details, task.subject, labels[task.task_type]].some((part) => String(part || "").toLowerCase().includes(query))) return false;
-      return true;
+    return records.filter(row => {
+      if (filter === "private" && row.audience !== "private") return false;
+      if (["announcement","activity","homework"].includes(filter) && row.task_type !== filter) return false;
+      return !query || [row.title,row.details,row.subject,labels[row.task_type]].some(x => String(x||"").toLowerCase().includes(query));
     });
   }
-
-  function renderTasks() {
-    const items = visibleTasks();
-    $("boardCount").textContent = `${items.length} รายการ`;
-    if (!items.length) {
-      grid.innerHTML = '<div class="empty-card"><strong>ยังไม่มีรายการในหมวดนี้</strong><span>เมื่อ Admin เพิ่มประกาศหรือการบ้าน รายการจะแสดงที่นี่</span></div>';
-      return;
-    }
-    grid.innerHTML = items.map((task, index) => `
-      <article class="task-card ${task.audience === "private" ? "private" : ""}" style="animation-delay:${Math.min(index * 45, 240)}ms">
-        <div class="task-meta"><span class="type-tag type-${escapeHTML(task.task_type)}">${escapeHTML(labels[task.task_type] || "รายการ")}</span><span class="visibility-tag ${task.audience === "private" ? "private-tag" : ""}">${task.audience === "private" ? "🔒 งานส่วนตัว" : "ทั้งห้อง"}</span></div>
-        <h3>${escapeHTML(task.title)}</h3>
-        ${task.subject ? `<p class="task-subject">${escapeHTML(task.subject)}</p>` : ""}
-        <p class="task-details">${escapeHTML(task.details || "ไม่มีรายละเอียดเพิ่มเติม")}</p>
-        <div class="task-bottom"><span class="due">${task.due_date ? "◷ " + escapeHTML(dateLabel(task.due_date)) : "ไม่มีกำหนดวัน"}</span><span>${task.audience === "private" ? "เฉพาะผู้รับ" : "M.4/11"}</span></div>
-      </article>`).join("");
+  function render() {
+    const rows = filtered(); $("boardCount").textContent = rows.length + " รายการ";
+    if (!rows.length) { $("taskGrid").innerHTML = '<div class="empty-card"><strong>ยังไม่มีรายการในหมวดนี้</strong><span>รายการจะปรากฏเมื่อ Admin เผยแพร่ประกาศหรือการบ้าน</span></div>'; return; }
+    $("taskGrid").innerHTML = rows.map((row,i)=>'<article class="task-card '+(row.audience==="private"?"private":"")+'" style="animation-delay:'+Math.min(i*45,240)+'ms"><div class="task-meta"><span class="type-tag type-'+esc(row.task_type)+'">'+esc(labels[row.task_type]||"รายการ")+'</span><span class="visibility-tag '+(row.audience==="private"?"private-tag":"")+'">'+(row.audience==="private"?"🔒 งานส่วนตัว":"ทั้งห้อง")+'</span></div><h3>'+esc(row.title)+'</h3>'+(row.subject?'<p class="task-subject">'+esc(row.subject)+'</p>':"")+'<p class="task-details">'+esc(row.details||"ไม่มีรายละเอียดเพิ่มเติม")+'</p><div class="task-bottom"><span class="due">'+(row.due_date?"◷ "+esc(dateText(row.due_date)):"ไม่มีกำหนดวัน")+'</span><span>'+(row.audience==="private"?"เฉพาะผู้รับ":"M.4/11")+'</span></div></article>').join("");
   }
-
-  function renderManageList() {
-    $("manageCount").textContent = `${tasks.length} รายการ`;
-    const list = $("manageList");
-    if (!tasks.length) {
-      list.innerHTML = '<div class="empty-card"><strong>ยังไม่มีรายการ</strong><span>สร้างรายการแรกจากแบบฟอร์มด้านบน</span></div>';
-      return;
-    }
-    list.innerHTML = tasks.map((task) => `
-      <div class="manage-item"><div><strong>${escapeHTML(task.title)}</strong><small>${escapeHTML(labels[task.task_type])} · ${task.audience === "private" ? "ส่วนตัว: " + escapeHTML(task.assigned_email) : "เปิดเผย"} · ${escapeHTML(dateLabel(task.due_date))}</small></div><div class="manage-actions"><button type="button" data-edit="${task.id}">แก้ไข</button><button type="button" class="delete" data-delete="${task.id}">ลบ</button></div></div>`).join("");
-    list.querySelectorAll("[data-edit]").forEach((button) => button.addEventListener("click", () => editTask(button.dataset.edit)));
-    list.querySelectorAll("[data-delete]").forEach((button) => button.addEventListener("click", () => deleteTask(button.dataset.delete)));
+  function renderAdminList() {
+    $("manageCount").textContent = records.length+" รายการ";
+    if (!records.length) { $("manageList").innerHTML='<div class="empty-card"><strong>ยังไม่มีรายการ</strong><span>สร้างรายการแรกจากแบบฟอร์มด้านบน</span></div>'; return; }
+    $("manageList").innerHTML=records.map(row=>'<div class="manage-item"><div><strong>'+esc(row.title)+'</strong><small>'+esc(labels[row.task_type])+' · '+(row.audience==="private"?"ส่วนตัว: "+esc(row.assigned_email):"เปิดเผย")+' · '+esc(dateText(row.due_date))+'</small></div><div class="manage-actions"><button data-edit="'+row.id+'">แก้ไข</button><button class="delete" data-delete="'+row.id+'">ลบ</button></div></div>').join("");
+    $("manageList").querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>fillEdit(b.dataset.edit));
+    $("manageList").querySelectorAll("[data-delete]").forEach(b=>b.onclick=()=>removeTask(b.dataset.delete));
   }
-
-  function resetTaskForm() {
-    $("taskForm").reset();
-    $("taskId").value = "";
-    $("taskAudience").value = "public";
-    $("privateRecipient").hidden = true;
-    $("saveTaskBtn").textContent = "เผยแพร่รายการ";
-    notice($("taskNotice"), "");
+  function resetForm() { $("taskForm").reset(); $("taskId").value=""; $("taskAudience").value="public"; $("privateRecipient").hidden=true; $("saveTaskBtn").textContent="เผยแพร่รายการ"; say($("taskNotice"),""); }
+  function fillEdit(id) {
+    const row=records.find(x=>x.id===id); if(!row)return;
+    $("taskId").value=row.id; $("taskTitle").value=row.title; $("taskType").value=row.task_type; $("taskSubject").value=row.subject||""; $("taskDetails").value=row.details||""; $("taskDue").value=row.due_date||""; $("taskAudience").value=row.audience; $("assignedEmail").value=row.assigned_email||""; $("privateRecipient").hidden=row.audience!=="private"; $("saveTaskBtn").textContent="บันทึกการแก้ไข"; $("taskTitle").focus();
   }
-
-  function editTask(id) {
-    const task = tasks.find((item) => item.id === id);
-    if (!task) return;
-    $("taskId").value = task.id;
-    $("taskTitle").value = task.title;
-    $("taskType").value = task.task_type;
-    $("taskSubject").value = task.subject || "";
-    $("taskDetails").value = task.details || "";
-    $("taskDue").value = task.due_date || "";
-    $("taskAudience").value = task.audience;
-    $("assignedEmail").value = task.assigned_email || "";
-    $("privateRecipient").hidden = task.audience !== "private";
-    $("saveTaskBtn").textContent = "บันทึกการแก้ไข";
-    $("taskTitle").focus();
+  async function removeTask(id) {
+    if(!admin||!confirm("ยืนยันลบรายการนี้?"))return;
+    const {error}=await db.from("class_tasks").delete().eq("id",id);
+    if(error)return alert("ลบไม่สำเร็จ: "+error.message);
+    await refreshTasks();
   }
-
-  async function deleteTask(id) {
-    if (!isAdmin || !confirm("ลบรายการนี้ใช่ไหม? การลบไม่สามารถย้อนกลับได้")) return;
-    const { error } = await client.from("class_tasks").delete().eq("id", id);
-    if (error) return alert("ลบไม่สำเร็จ: " + error.message);
-    await loadTasks();
-  }
-
-  async function openAuthModal() {
-    $("authModal").hidden = false;
-    $("authNotice").textContent = "";
-    $("signOutBtn").hidden = !currentUser;
-    $("authEmail").value = currentUser?.email || "";
-    $("authPassword").value = "";
-    $("authSubmit").textContent = currentUser ? "คุณเข้าสู่ระบบแล้ว" : "เข้าสู่ระบบ";
-    $("authSubmit").disabled = Boolean(currentUser);
-  }
-
-  async function openAdminModal() {
-    $("adminModal").hidden = false;
-    $("adminLoginView").hidden = isAdmin;
-    $("adminPanel").hidden = !isAdmin;
-    $("adminLoginNotice").textContent = "";
-    if (isAdmin) renderManageList();
-  }
-
   async function syncSession(session) {
-    currentUser = session?.user || null;
-    isAdmin = await checkAdmin(currentUser);
-    $("accountBtn").textContent = currentUser ? "บัญชี: " + (currentUser.email || "เข้าสู่ระบบแล้ว") : "เข้าสู่ระบบนักเรียน";
-    $("adminBtn").textContent = isAdmin ? "⚙ จัดการ Admin" : "⚙ Admin";
-    $("privateHint").hidden = Boolean(currentUser);
-    await loadTasks();
+    user=session?.user||null; admin=await isAuthorizedAdmin(user);
+    $("accountBtn").textContent=user?"บัญชี: "+(user.email||"เข้าสู่ระบบแล้ว"):"เข้าสู่ระบบนักเรียน";
+    $("adminBtn").textContent=admin?"⚙ จัดการ Admin":"⚙ Admin"; $("privateHint").hidden=Boolean(user);
+    await refreshTasks();
   }
-
-  $("filters").addEventListener("click", (event) => {
-    const button = event.target.closest("[data-filter]");
-    if (!button) return;
-    activeFilter = button.dataset.filter;
-    filterButtons.forEach((item) => item.classList.toggle("active", item === button));
-    renderTasks();
-  });
-  $("searchInput").addEventListener("input", renderTasks);
-  $("accountBtn").addEventListener("click", openAuthModal);
-  $("hintLogin").addEventListener("click", openAuthModal);
-  $("adminBtn").addEventListener("click", openAdminModal);
-  $("closeAuth").addEventListener("click", () => $("authModal").hidden = true);
-  $("closeAdmin").addEventListener("click", () => $("adminModal").hidden = true);
-  ["authModal", "adminModal"].forEach((id) => $(id).addEventListener("click", (event) => { if (event.target === $(id)) $(id).hidden = true; }));
-  $("taskAudience").addEventListener("change", () => $("privateRecipient").hidden = $("taskAudience").value !== "private");
-  $("resetTaskBtn").addEventListener("click", resetTaskForm);
-
-  $("authForm").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    if (currentUser) return;
-    const { data, error } = await client.auth.signInWithPassword({ email: $("authEmail").value.trim(), password: $("authPassword").value });
-    if (error) return notice($("authNotice"), "เข้าสู่ระบบไม่สำเร็จ: " + error.message, true);
-    $("authModal").hidden = true;
-    await syncSession(data.session);
-  });
-
-  $("signOutBtn").addEventListener("click", async () => {
-    await client.auth.signOut();
-    $("authModal").hidden = true;
-    await syncSession(null);
-  });
-
-  $("adminAuthForm").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const { data, error } = await client.auth.signInWithPassword({ email: $("adminEmail").value.trim(), password: $("adminPassword").value });
-    if (error) return notice($("adminLoginNotice"), "เข้าสู่ระบบไม่สำเร็จ: " + error.message, true);
-    const allowed = await checkAdmin(data.user);
-    if (!allowed) {
-      await client.auth.signOut();
-      return notice($("adminLoginNotice"), "บัญชีนี้ไม่ได้รับสิทธิ์ Admin ในฐานข้อมูล", true);
-    }
-    await syncSession(data.session);
-    $("adminLoginView").hidden = true;
-    $("adminPanel").hidden = false;
-  });
-
-  $("adminSignOut").addEventListener("click", async () => {
-    await client.auth.signOut();
-    $("adminModal").hidden = true;
-    await syncSession(null);
-  });
-
-  $("taskForm").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    if (!isAdmin) return notice($("taskNotice"), "จำเป็นต้องเข้าสู่ระบบ Admin", true);
-    const audience = $("taskAudience").value;
-    const assignedEmail = $("assignedEmail").value.trim().toLowerCase();
-    if (audience === "private" && !assignedEmail) return notice($("taskNotice"), "กรุณาระบุอีเมลผู้รับงานส่วนตัว", true);
-    const payload = {
-      title: $("taskTitle").value.trim(),
-      details: $("taskDetails").value.trim(),
-      task_type: $("taskType").value,
-      subject: $("taskSubject").value.trim(),
-      due_date: $("taskDue").value || null,
-      audience,
-      assigned_email: audience === "private" ? assignedEmail : null,
-      updated_at: new Date().toISOString()
-    };
-    const id = $("taskId").value;
-    const result = id
-      ? await client.from("class_tasks").update(payload).eq("id", id)
-      : await client.from("class_tasks").insert(payload);
-    if (result.error) return notice($("taskNotice"), "บันทึกไม่สำเร็จ: " + result.error.message, true);
-    notice($("taskNotice"), id ? "บันทึกการแก้ไขแล้ว" : "เผยแพร่รายการแล้ว");
-    resetTaskForm();
-    await loadTasks();
-  });
-
-  if (!client) {
-    loadTasks();
-    $("accountBtn").disabled = $("adminBtn").disabled = true;
-    return;
-  }
-  client.auth.onAuthStateChange((_event, session) => {
-    // Avoid a Supabase auth callback's async work blocking its internal event queue.
-    queueMicrotask(() => syncSession(session));
-  });
-  client.auth.getSession().then(({ data }) => syncSession(data.session));
+  $("filters").onclick=e=>{const b=e.target.closest("[data-filter]");if(!b)return;filter=b.dataset.filter;document.querySelectorAll(".filter").forEach(x=>x.classList.toggle("active",x===b));render();};
+  $("searchInput").oninput=render;
+  $("accountBtn").onclick=$("hintLogin").onclick=()=>{$("authModal").hidden=false;$("authNotice").textContent="";$("authEmail").value=user?.email||"";$("authPassword").value="";$("signOutBtn").hidden=!user;$("authSubmit").disabled=Boolean(user);};
+  $("adminBtn").onclick=()=>{$("adminModal").hidden=false;$("adminLoginView").hidden=admin;$("adminPanel").hidden=!admin;$("adminLoginNotice").textContent="";if(admin)renderAdminList();};
+  $("closeAuth").onclick=()=> $("authModal").hidden=true; $("closeAdmin").onclick=()=> $("adminModal").hidden=true;
+  ["authModal","adminModal"].forEach(id=>$(id).onclick=e=>{if(e.target===$(id))$(id).hidden=true;});
+  $("taskAudience").onchange=()=> $("privateRecipient").hidden=$("taskAudience").value!=="private";
+  $("resetTaskBtn").onclick=resetForm;
+  $("authForm").onsubmit=async e=>{e.preventDefault();if(user)return;const {data,error}=await db.auth.signInWithPassword({email:$("authEmail").value.trim(),password:$("authPassword").value});if(error)return say($("authNotice"),"เข้าสู่ระบบไม่สำเร็จ: "+error.message,true);$("authModal").hidden=true;await syncSession(data.session);};
+  $("signOutBtn").onclick=async()=>{await db.auth.signOut();$("authModal").hidden=true;await syncSession(null);};
+  $("adminAuthForm").onsubmit=async e=>{e.preventDefault();const {data,error}=await db.auth.signInWithPassword({email:$("adminEmail").value.trim(),password:$("adminPassword").value});if(error)return say($("adminLoginNotice"),"เข้าสู่ระบบไม่สำเร็จ: "+error.message,true);if(!(await isAuthorizedAdmin(data.user))){await db.auth.signOut();return say($("adminLoginNotice"),"บัญชีนี้ไม่มีสิทธิ์ Admin ในฐานข้อมูล",true);}await syncSession(data.session);$("adminLoginView").hidden=true;$("adminPanel").hidden=false;};
+  $("adminSignOut").onclick=async()=>{await db.auth.signOut();$("adminModal").hidden=true;await syncSession(null);};
+  $("taskForm").onsubmit=async e=>{
+    e.preventDefault();if(!admin)return say($("taskNotice"),"จำเป็นต้องเข้าสู่ระบบ Admin",true);
+    const audience=$("taskAudience").value,email=$("assignedEmail").value.trim().toLowerCase();
+    if(audience==="private"&&!email)return say($("taskNotice"),"กรุณาระบุอีเมลบัญชีผู้รับงานส่วนตัว",true);
+    const payload={title:$("taskTitle").value.trim(),details:$("taskDetails").value.trim(),task_type:$("taskType").value,subject:$("taskSubject").value.trim(),due_date:$("taskDue").value||null,audience,assigned_email:audience==="private"?email:null,updated_at:new Date().toISOString()};
+    const id=$("taskId").value, result=id?await db.from("class_tasks").update(payload).eq("id",id):await db.from("class_tasks").insert(payload);
+    if(result.error)return say($("taskNotice"),"บันทึกไม่สำเร็จ: "+result.error.message,true);
+    say($("taskNotice"),id?"แก้ไขรายการแล้ว":"เผยแพร่รายการแล้ว");resetForm();await refreshTasks();
+  };
+  if(!db){$("taskGrid").innerHTML='<div class="empty-card"><strong>ไม่พบ Supabase config</strong></div>';return;}
+  db.auth.onAuthStateChange((_event,session)=>queueMicrotask(()=>syncSession(session)));
+  db.auth.getSession().then(({data})=>syncSession(data.session));
 })();
