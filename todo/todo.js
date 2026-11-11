@@ -4,7 +4,7 @@
   const db = window.supabase?.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
   const $ = (id) => document.getElementById(id);
   const labels = { announcement: "ประกาศ", activity: "กิจกรรม", homework: "การบ้าน" };
-  let records = [], user = null, admin = false, filter = "all";
+  let records = [], user = null, admin = false, filter = "all", taskGroups = [], roster = [];
   const esc = (v = "") => String(v).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const say = (el, msg, error = false) => { el.textContent = msg; el.style.color = error ? "#e5b5b5" : "#d2baf1"; };
   const dateText = (value) => value ? new Intl.DateTimeFormat("th-TH",{day:"numeric",month:"short",year:"numeric"}).format(new Date(value+"T00:00:00")) : "ไม่ระบุกำหนดวัน";
@@ -32,7 +32,7 @@
   function filtered() {
     const query = $("searchInput").value.trim().toLowerCase();
     return records.filter(row => {
-      if (filter === "private" && row.audience !== "private") return false;
+      if (filter === "private" && row.audience === "public") return false;
       if (["announcement","activity","homework"].includes(filter) && row.task_type !== filter) return false;
       return !query || [row.title,row.details,row.subject,labels[row.task_type]].some(x => String(x||"").toLowerCase().includes(query));
     });
@@ -49,10 +49,30 @@
     $("manageList").querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>fillEdit(b.dataset.edit));
     $("manageList").querySelectorAll("[data-delete]").forEach(b=>b.onclick=()=>removeTask(b.dataset.delete));
   }
-  function resetForm() { $("taskForm").reset(); $("taskId").value=""; $("taskAudience").value="public"; $("privateRecipient").hidden=true; $("saveTaskBtn").textContent="เผยแพร่รายการ"; say($("taskNotice"),""); }
+
+  async function loadGroupAdminData(){
+    const [gRes,mRes,rRes,nRes]=await Promise.all([db.from("class_task_groups").select("*").order("name"),db.from("class_task_group_members").select("*"),db.from("student_roster").select("student_number,email").order("student_number"),db.from("seatmap_student_roster").select("student_number,student_name").order("student_number")]);
+    if(gRes.error||mRes.error||rRes.error||nRes.error){console.error(gRes.error||mRes.error||rRes.error||nRes.error);say($("groupNotice"),"โหลดกลุ่ม/รายชื่อนักเรียนไม่สำเร็จ โปรดตรวจสอบสิทธิ์ฐานข้อมูล",true);return;}
+    const nameMap=new Map((nRes.data||[]).map(s=>[String(s.student_number),s.student_name]));roster=(rRes.data||[]).map(s=>({...s,student_number:String(s.student_number),student_name:nameMap.get(String(s.student_number))||"นักเรียน"}));
+    const memberRows=mRes.data||[];taskGroups=(gRes.data||[]).map(g=>({...g,members:memberRows.filter(m=>m.group_id===g.id)}));
+    const opts=roster.map(s=>'<option value="'+esc(s.student_number)+'">'+esc(s.student_number+' · '+s.student_name+' · '+s.email)+'</option>').join("");$("groupMembers").innerHTML=opts;
+    $("groupSelect").innerHTML='<option value="">— สร้างกลุ่มใหม่ —</option>'+taskGroups.map(g=>'<option value="'+g.id+'">'+esc(g.name)+' ('+g.members.length+' คน)</option>').join("");
+    $("assignedGroup").innerHTML='<option value="">— เลือกกลุ่ม —</option>'+taskGroups.map(g=>'<option value="'+g.id+'">'+esc(g.name)+' ('+g.members.length+' คน)</option>').join("");
+    $("groupList").innerHTML=taskGroups.length?taskGroups.map(g=>'<div class="manage-item"><div><strong>'+esc(g.name)+'</strong><small>สมาชิก '+g.members.length+' คน</small></div><div class="manage-actions"><button type="button" data-group-edit="'+g.id+'">แก้ไขสมาชิก</button></div></div>').join(""):'<div class="empty-card"><strong>ยังไม่มีกลุ่ม</strong><span>สร้างกลุ่มแรกได้จากฟอร์มด้านบน</span></div>';
+    $("groupList").querySelectorAll("[data-group-edit]").forEach(b=>b.onclick=()=>{$("groupSelect").value=b.dataset.groupEdit;$("groupSelect").dispatchEvent(new Event("change"));});
+  }
+  async function saveGroup(){
+    if(!admin)return say($("groupNotice"),"ต้องเข้าสู่ระบบ Admin",true);
+    const name=$("groupName").value.trim(),selected=[...$("groupMembers").selectedOptions].map(o=>o.value),id=$("groupSelect").value;
+    if(!name)return say($("groupNotice"),"กรุณากรอกชื่อกลุ่ม",true);if(!selected.length)return say($("groupNotice"),"เลือกสมาชิกอย่างน้อย 1 คน",true);
+    let groupId=id;if(id){const {error}=await db.from("class_task_groups").update({name,updated_at:new Date().toISOString()}).eq("id",id);if(error)return say($("groupNotice"),"แก้ไขกลุ่มไม่สำเร็จ: "+error.message,true);const del=await db.from("class_task_group_members").delete().eq("group_id",id);if(del.error)return say($("groupNotice"),"ปรับสมาชิกไม่สำเร็จ: "+del.error.message,true);}else{const {data,error}=await db.from("class_task_groups").insert({name}).select("id").single();if(error)return say($("groupNotice"),"สร้างกลุ่มไม่สำเร็จ: "+error.message,true);groupId=data.id;}
+    const {error}=await db.from("class_task_group_members").insert(selected.map(student_number=>({group_id:groupId,student_number})));if(error)return say($("groupNotice"),"บันทึกสมาชิกไม่สำเร็จ: "+error.message,true);
+    say($("groupNotice"),id?"อัปเดตสมาชิกกลุ่มแล้ว":"สร้างกลุ่มและกำหนดสมาชิกแล้ว");await loadGroupAdminData();$("groupSelect").value=groupId;$("groupSelect").dispatchEvent(new Event("change"));
+  }
+  function resetForm() { $("taskForm").reset(); $("taskId").value=""; $("taskAudience").value="public"; $("privateRecipient").hidden=true; $("groupRecipient").hidden=true; $("taskSubjectCustom").hidden=true; $("saveTaskBtn").textContent="เผยแพร่รายการ"; say($("taskNotice"),""); }
   function fillEdit(id) {
     const row=records.find(x=>x.id===id); if(!row)return;
-    $("taskId").value=row.id; $("taskTitle").value=row.title; $("taskType").value=row.task_type; $("taskSubject").value=row.subject||""; $("taskDetails").value=row.details||""; $("taskDue").value=row.due_date||""; $("taskAudience").value=row.audience; $("assignedEmail").value=row.assigned_email||""; $("privateRecipient").hidden=row.audience!=="private"; $("saveTaskBtn").textContent="บันทึกการแก้ไข"; $("taskTitle").focus();
+    $("taskId").value=row.id; $("taskTitle").value=row.title; $("taskType").value=row.task_type; const subject=row.subject||""; const subjectOption=[...$("taskSubject").options].some(o=>o.value===subject); $("taskSubject").value=subjectOption?subject:(subject?"__custom":""); $("taskSubjectCustom").value=subjectOption?"":subject; $("taskSubjectCustom").hidden=subjectOption||!subject; $("taskDetails").value=row.details||""; $("taskDue").value=row.due_date||""; $("taskAudience").value=row.audience; $("assignedEmail").value=row.assigned_email||""; $("privateRecipient").hidden=row.audience!=="private"; $("groupRecipient").hidden=row.audience!=="group"; $("assignedGroup").value=row.assigned_group_id||""; $("saveTaskBtn").textContent="บันทึกการแก้ไข"; $("taskTitle").focus();
   }
   async function removeTask(id) {
     if(!admin||!confirm("ยืนยันลบรายการนี้?"))return;
@@ -61,7 +81,7 @@
     await refreshTasks();
   }
   async function syncSession(session) {
-    user=session?.user||null; admin=await isAuthorizedAdmin(user);
+    user=session?.user||null; admin=await isAuthorizedAdmin(user); if(admin) await loadGroupAdminData();
     $("accountBtn").textContent=user?"บัญชี: "+(user.email||"เข้าสู่ระบบแล้ว"):"เข้าสู่ระบบนักเรียน";
     $("adminBtn").textContent=admin?"⚙ จัดการ Admin":"⚙ Admin"; $("privateHint").hidden=Boolean(user);
     await refreshTasks();
@@ -73,7 +93,13 @@
   $("adminBtn").onclick=()=>{$("adminModal").hidden=false;$("adminLoginView").hidden=admin;$("adminPanel").hidden=!admin;$("adminLoginNotice").textContent="";if(admin)renderAdminList();};
   $("closeAuth").onclick=()=> $("authModal").hidden=true; $("closeAdmin").onclick=()=> $("adminModal").hidden=true;
   ["authModal","adminModal"].forEach(id=>$(id).onclick=e=>{if(e.target===$(id))$(id).hidden=true;});
-  $("taskAudience").onchange=()=> $("privateRecipient").hidden=$("taskAudience").value!=="private";
+  $("taskAudience").onchange=()=>{const audience=$("taskAudience").value;$("privateRecipient").hidden=audience!=="private";$("groupRecipient").hidden=audience!=="group";};
+  $("taskSubject").onchange=()=>{$("taskSubjectCustom").hidden=$("taskSubject").value!=="__custom";if($("taskSubject").value!=="__custom")$("taskSubjectCustom").value="";};
+  document.querySelectorAll("[data-date-offset]").forEach(btn=>btn.onclick=()=>{const d=new Date();d.setDate(d.getDate()+Number(btn.dataset.dateOffset));$("taskDue").value=[d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");});
+  $("clearDue").onclick=()=> $("taskDue").value="";
+  $("groupSelect").onchange=()=>{const id=$("groupSelect").value;const g=taskGroups.find(x=>x.id===id);$("groupName").value=g?.name||"";const ids=(g?.members||[]).map(m=>m.student_number);[...$("groupMembers").options].forEach(o=>o.selected=ids.includes(o.value));$("saveGroupBtn").textContent=g?"บันทึกสมาชิกกลุ่ม":"สร้างกลุ่ม";};
+  $("clearGroupBtn").onclick=()=>{ $("groupSelect").value="";$("groupName").value="";[...$("groupMembers").options].forEach(o=>o.selected=false);$("saveGroupBtn").textContent="สร้างกลุ่ม";say($("groupNotice"),"");};
+  $("saveGroupBtn").onclick=saveGroup;
   $("resetTaskBtn").onclick=resetForm;
   $("authForm").onsubmit=async e=>{e.preventDefault();if(user)return;const {data,error}=await db.auth.signInWithPassword({email:$("authEmail").value.trim(),password:$("authPassword").value});if(error)return say($("authNotice"),"เข้าสู่ระบบไม่สำเร็จ: "+error.message,true);$("authModal").hidden=true;await syncSession(data.session);};
   $("signOutBtn").onclick=async()=>{await db.auth.signOut();$("authModal").hidden=true;await syncSession(null);};
@@ -83,7 +109,7 @@
     e.preventDefault();if(!admin)return say($("taskNotice"),"จำเป็นต้องเข้าสู่ระบบ Admin",true);
     const audience=$("taskAudience").value,email=$("assignedEmail").value.trim().toLowerCase();
     if(audience==="private"&&!email)return say($("taskNotice"),"กรุณาระบุอีเมลบัญชีผู้รับงานส่วนตัว",true);
-    const payload={title:$("taskTitle").value.trim(),details:$("taskDetails").value.trim(),task_type:$("taskType").value,subject:$("taskSubject").value.trim(),due_date:$("taskDue").value||null,audience,assigned_email:audience==="private"?email:null,updated_at:new Date().toISOString()};
+    const chosenSubject=$("taskSubject").value;const subject=chosenSubject==="__custom"?$("taskSubjectCustom").value.trim():chosenSubject;const groupId=$("assignedGroup").value;if(audience==="group"&&!groupId)return say($("taskNotice"),"กรุณาเลือกกลุ่มผู้รับงาน",true);const payload={title:$("taskTitle").value.trim(),details:$("taskDetails").value.trim(),task_type:$("taskType").value,subject,due_date:$("taskDue").value||null,audience,assigned_email:audience==="private"?email:null,assigned_group_id:audience==="group"?groupId:null,updated_at:new Date().toISOString()};
     const id=$("taskId").value, result=id?await db.from("class_tasks").update(payload).eq("id",id):await db.from("class_tasks").insert(payload);
     if(result.error)return say($("taskNotice"),"บันทึกไม่สำเร็จ: "+result.error.message,true);
     say($("taskNotice"),id?"แก้ไขรายการแล้ว":"เผยแพร่รายการแล้ว");resetForm();await refreshTasks();
