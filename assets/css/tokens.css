@@ -1,0 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root {
+  color-scheme: light;
+  --color-canvas: #f2f0e8;
+  --color-paper: #fbfaf5;
+  --color-paper-muted: #e9e8df;
+  --color-ink: #202720;
+  --color-muted: #687168;
+  --color-faint: #92998f;
+  --color-line: #d7d9ce;
+  --color-line-strong: #b9c0b5;
+  --color-brand: #294d3d;
+  --color-brand-strong: #1d392d;
+  --color-brand-soft: #e0e9df;
+  --color-accent: #b85e3d;
+  --color-accent-soft: #f1e3da;
+  --color-warning: #94602e;
+  --color-danger: #a43f37;
+  --color-success: #2f7552;
+  --font-body: 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif;
+  --font-display: 'Manrope', 'IBM Plex Sans Thai', sans-serif;
+  --font-xs: clamp(.72rem, .68rem + .12vw, .8rem);
+  --font-sm: clamp(.84rem, .8rem + .16vw, .94rem);
+  --font-md: clamp(1rem, .96rem + .2vw, 1.12rem);
+  --font-lg: clamp(1.25rem, 1.1rem + .6vw, 1.65rem);
+  --font-xl: clamp(1.8rem, 1.35rem + 1.8vw, 2.9rem);
+  --font-display-xl: clamp(2.6rem, 5.8vw, 5.6rem);
+  --space-1: .35rem;
+  --space-2: .6rem;
+  --space-3: .9rem;
+  --space-4: 1.2rem;
+  --space-5: 1.6rem;
+  --space-6: 2.2rem;
+  --space-7: 3rem;
+  --space-8: clamp(3.5rem, 6vw, 5.5rem);
+  --radius-sm: 7px;
+  --radius-md: 13px;
+  --radius-lg: 21px;
+  --radius-xl: 30px;
+  --content-width: 1280px;
+  --focus-ring: 0 0 0 3px rgb(41 77 61 / 22%);
+  --ease-standard: cubic-bezier(.2, .7, .2, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; text-size-adjust: 100%; }
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  color: var(--color-ink);
+  background: var(--color-canvas);
+  font-family: var(--font-body);
+  font-size: var(--font-md);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+button, input, select, textarea { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+a { color: inherit; }
+button { color: inherit; }
+:focus-visible { outline: 2px solid var(--color-brand); outline-offset: 3px; }
+[hidden] { display: none !important; }
+::selection { color: #fff; background: var(--color-brand); }

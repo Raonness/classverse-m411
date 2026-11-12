@@ -1,5 +1,12 @@
 "use strict";
-const $=id=>document.getElementById(id);
+const elements = new Map(Array.from(document.querySelectorAll("[id]"), element => [element.id, element]));
+const $ = id => elements.get(id) || document.getElementById(id);
+const requiredElements = ["adminBoard","adminBtn","adminLogin","adminOverlay","assignForm","auditLog","closeAdmin","editBirthday","editName","editNickname","editNo","editReason","editSeat","email","loginForm","logout","occupied","password","reason","requesterName","requesterNo","requests","rosterHint","seatGrid","selectedLabel","selectedSeat","selectedStudent","statBooked","statFree","studentSuggestions","swapForm","targetSeat"];
+const missingElements = requiredElements.filter(id => !$(id));
+if (missingElements.length) {
+  console.error("ClassVerse seating page is missing required elements:", missingElements);
+  throw new Error("Seating interface could not start because its HTML contract is incomplete.");
+}
 const SEATS=['A1','A2','A3','A4','A5','B1','B2','B3','B4','B5','C1','C2','C3','C4','C5','D1','D2','D3','D4','D5','E1','E2','E3','E4','E5','E6','F1','F2','F3','F4','F5','F6','G2','G3','G6','H2','H6','I2','J2','J3'];
 const COLS='ABCDEFGHIJ'.split('');
 const cfg=window.CLASSROOM_CONFIG||{};

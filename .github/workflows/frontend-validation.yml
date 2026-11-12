@@ -1,0 +1,100 @@
+name: Frontend validation
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [redesign/production-classverse]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: HTML, asset paths and JavaScript syntax
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check JavaScript syntax
+        run: |
+          node --check app.js
+          node --check booking/app.js
+          node --check seating/app.js
+          node --check todo/app.js
+          node --check seating/swap-finder-fix.js
+
+      - name: Validate To-Do database and UI contracts
+        run: node tests/contracts.mjs
+
+      - name: Validate HTML contracts and local assets
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync, existsSync } from 'node:fs';
+          import { resolve, dirname } from 'node:path';
+
+          const pages = ['index.html', 'booking/index.html', 'seating/index.html', 'todo/index.html'];
+          const failures = [];
+
+          for (const page of pages) {
+            const source = readFileSync(page, 'utf8');
+            const ids = [...source.matchAll(/\bid=["']([^"']+)["']/g)].map(match => match[1]);
+            const duplicates = ids.filter((id, index) => ids.indexOf(id) !== index);
+            if (duplicates.length) failures.push(`${page}: duplicate IDs: ${[...new Set(duplicates)].join(', ')}`);
+
+            if (/<style\b/i.test(source) || /\sstyle\s*=/i.test(source)) failures.push(`${page}: inline CSS is not allowed`);
+            if (/<script\b(?![^>]*\bsrc=)[^>]*>/i.test(source)) failures.push(`${page}: inline JavaScript is not allowed`);
+
+            const refs = [
+              ...[...source.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["']/gi)].map(match => match[1]),
+              ...[...source.matchAll(/<link\b[^>]*\bhref=["']([^"']+)["']/gi)].map(match => match[1])
+            ];
+
+            for (const ref of refs) {
+              if (/^(https?:|data:|mailto:|tel:|#|javascript:)/i.test(ref)) continue;
+              const localPath = ref.split(/[?#]/, 1)[0];
+              if (!localPath) continue;
+              const target = resolve(dirname(page), localPath);
+              if (!existsSync(target)) failures.push(`${page}: missing local asset ${ref}`);
+            }
+            console.log(`Validated ${page}`);
+          }
+
+          if (failures.length) {
+            console.error(failures.join('\n'));
+            process.exit(1);
+          }
+          console.log('All page contracts and local asset paths passed.');
+          NODE
+
+      - name: Check patch whitespace
+        run: git diff --check
+
+      - name: Install browser test runtime
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+
+      - name: Start local preview server
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/classverse-http.log 2>&1 &
+          echo $! > /tmp/classverse-http.pid
+          for attempt in $(seq 1 20); do
+            if curl --silent --fail http://127.0.0.1:4173/ > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/classverse-http.log
+          exit 1
+
+      - name: Run browser smoke tests
+        run: node tests/smoke.mjs
+
+      - name: Run booking demo interaction test
+        run: node tests/booking-demo.mjs

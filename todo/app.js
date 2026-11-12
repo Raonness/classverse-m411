@@ -2,11 +2,18 @@
 (() => {
   const cfg = window.CLASSROOM_CONFIG || {};
   const db = window.supabase?.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
-  const $ = (id) => document.getElementById(id);
+  const elements = new Map(Array.from(document.querySelectorAll("[id]"), element => [element.id, element]));
+  const $ = (id) => elements.get(id) || document.getElementById(id);
+  const requiredElements = ["accountBtn","adminAuthForm","adminBtn","adminEmail","adminLoginNotice","adminLoginView","adminModal","adminPanel","adminPassword","adminSignOut","assignedEmail","assignedGroup","authEmail","authForm","authModal","authNotice","authPassword","authSubmit","boardCount","clearDue","clearGroupBtn","closeAdmin","closeAuth","filters","groupList","groupMembers","groupName","groupNotice","groupRecipient","groupSelect","hintLogin","manageCount","manageList","privateHint","privateRecipient","resetTaskBtn","saveGroupBtn","saveTaskBtn","searchInput","signOutBtn","taskAudience","taskDetails","taskDue","taskForm","taskGrid","taskId","taskNotice","taskSubject","taskSubjectCustom","taskTitle","taskType"];
+  const missingElements = requiredElements.filter(id => !$(id));
+  if (missingElements.length) {
+    console.error("ClassVerse task page is missing required elements:", missingElements);
+    throw new Error("Task board could not start because its HTML contract is incomplete.");
+  }
   const labels = { announcement: "ประกาศ", activity: "กิจกรรม", homework: "การบ้าน" };
   let records = [], user = null, admin = false, filter = "all", taskGroups = [], roster = [];
   const esc = (v = "") => String(v).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  const say = (el, msg, error = false) => { el.textContent = msg; el.style.color = error ? "#e5b5b5" : "#d2baf1"; };
+  const say = (el, msg, error = false) => { if (!el) return; el.textContent = msg; el.classList.toggle("is-error", error); };
   const dateText = (value) => value ? new Intl.DateTimeFormat("th-TH",{day:"numeric",month:"short",year:"numeric"}).format(new Date(value+"T00:00:00")) : "ไม่ระบุกำหนดวัน";
   // Deadline dates are considered due at local end-of-day.
   const deadlineAt = (value) => value ? new Date(value+"T23:59:59").getTime() : null;
@@ -32,7 +39,7 @@
   function filtered() {
     const query = $("searchInput").value.trim().toLowerCase();
     return records.filter(row => {
-      if (filter === "private" && row.audience === "public") return false;
+      if (filter === "private" && row.audience !== "private") return false;
       if (["announcement","activity","homework"].includes(filter) && row.task_type !== filter) return false;
       return !query || [row.title,row.details,row.subject,labels[row.task_type]].some(x => String(x||"").toLowerCase().includes(query));
     });
@@ -40,7 +47,7 @@
   function render() {
     const rows = filtered(); $("boardCount").textContent = rows.length + " รายการ";
     if (!rows.length) { $("taskGrid").innerHTML = '<div class="empty-card"><strong>ยังไม่มีรายการในหมวดนี้</strong><span>รายการจะปรากฏเมื่อ Admin เผยแพร่ประกาศหรือการบ้าน</span></div>'; return; }
-    $("taskGrid").innerHTML = rows.map((row,i)=>'<article class="task-card '+(row.audience==="private"?"private":"")+(isPastDeadline(row.due_date)?" task-completed":"")+'" style="animation-delay:'+Math.min(i*45,240)+'ms"><div class="task-meta"><span class="type-tag type-'+esc(row.task_type)+'">'+esc(labels[row.task_type]||"รายการ")+'</span><span class="visibility-tag '+(row.audience==="private"?"private-tag":"")+'">'+(row.audience==="private"?"🔒 งานส่วนตัว":row.audience==="group"?"👥 งานกลุ่ม":"ทั้งห้อง")+'</span></div><div class="task-status '+(isPastDeadline(row.due_date)?"status-done":"")+'">'+(isPastDeadline(row.due_date)?"✓ เสร็จแล้ว":"● กำลังดำเนินการ")+'</div><h3 class="'+(isPastDeadline(row.due_date)?"completed-text":"")+'">'+esc(row.title)+'</h3>'+(row.subject?'<p class="task-subject">'+esc(row.subject)+'</p>':"")+'<p class="task-details '+(isPastDeadline(row.due_date)?"completed-text":"")+'">'+esc(row.details||"ไม่มีรายละเอียดเพิ่มเติม")+'</p><div class="task-bottom"><span class="due">'+(row.due_date?"◷ "+esc(dateText(row.due_date)):"ไม่มีกำหนดวัน")+'</span><span class="countdown '+(isPastDeadline(row.due_date)?"countdown-done":"")+'" '+(row.due_date?'data-deadline="'+esc(row.due_date)+'"':"")+'>'+(row.due_date?esc(countdownText(row.due_date)):"ไม่มีกำหนดเวลา")+'</span></div></article>').join("");
+    $("taskGrid").innerHTML = rows.map((row,i)=>'<article class="task-card '+(row.audience==="private"?"private":"")+(isPastDeadline(row.due_date)?" task-completed":"")+'"><div class="task-meta"><span class="type-tag type-'+esc(row.task_type)+'">'+esc(labels[row.task_type]||"รายการ")+'</span><span class="visibility-tag '+(row.audience==="private"?"private-tag":"")+'">'+(row.audience==="private"?"🔒 งานส่วนตัว":row.audience==="group"?"👥 งานกลุ่ม":"ทั้งห้อง")+'</span></div><div class="task-status '+(isPastDeadline(row.due_date)?"status-done":"")+'">'+(isPastDeadline(row.due_date)?"✓ เสร็จแล้ว":"● กำลังดำเนินการ")+'</div><h3 class="'+(isPastDeadline(row.due_date)?"completed-text":"")+'">'+esc(row.title)+'</h3>'+(row.subject?'<p class="task-subject">'+esc(row.subject)+'</p>':"")+'<p class="task-details '+(isPastDeadline(row.due_date)?"completed-text":"")+'">'+esc(row.details||"ไม่มีรายละเอียดเพิ่มเติม")+'</p><div class="task-bottom"><span class="due">'+(row.due_date?"◷ "+esc(dateText(row.due_date)):"ไม่มีกำหนดวัน")+'</span><span class="countdown '+(isPastDeadline(row.due_date)?"countdown-done":"")+'" '+(row.due_date?'data-deadline="'+esc(row.due_date)+'"':"")+'>'+(row.due_date?esc(countdownText(row.due_date)):"ไม่มีกำหนดเวลา")+'</span></div></article>').join("");
   }
   function renderAdminList() {
     $("manageCount").textContent = records.length+" รายการ";
@@ -51,8 +58,8 @@
   }
 
   async function loadGroupAdminData(){
-    const [gRes,mRes,rRes,nRes]=await Promise.all([db.from("class_task_groups").select("*").order("name"),db.from("class_task_group_members").select("*"),db.from("student_roster").select("student_number,email").order("student_number"),db.from("seatmap_student_roster").select("student_number,student_name").order("student_number")]);
-    if(gRes.error||mRes.error||rRes.error||nRes.error){console.error(gRes.error||mRes.error||rRes.error||nRes.error);say($("groupNotice"),"โหลดกลุ่ม/รายชื่อนักเรียนไม่สำเร็จ โปรดตรวจสอบสิทธิ์ฐานข้อมูล",true);return;}
+    const [gRes,mRes,rRes,nRes]=await Promise.all([db.from("class_task_groups").select("*").order("name"),db.from("class_task_group_members").select("*"),db.from("class_task_student_accounts").select("student_number,email").order("student_number"),db.rpc("seatmap_public_snapshot")]);
+    if(gRes.error||mRes.error||rRes.error||nRes.error){console.error(gRes.error||mRes.error||rRes.error||nRes.error);say($("groupNotice"),"โหลดกลุ่ม/รายชื่อนักเรียนไม่สำเร็จ โปรดตรวจสอบ To-Do SQL และรายชื่อนักเรียน",true);return;}
     const nameMap=new Map((nRes.data||[]).map(s=>[String(s.student_number),s.student_name]));roster=(rRes.data||[]).map(s=>({...s,student_number:String(s.student_number),student_name:nameMap.get(String(s.student_number))||"นักเรียน"}));
     const memberRows=mRes.data||[];taskGroups=(gRes.data||[]).map(g=>({...g,members:memberRows.filter(m=>m.group_id===g.id)}));
     const opts=roster.map(s=>'<option value="'+esc(s.student_number)+'">'+esc(s.student_number+' · '+s.student_name+' · '+s.email)+'</option>').join("");$("groupMembers").innerHTML=opts;

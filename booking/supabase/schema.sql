@@ -56,9 +56,11 @@ create unique index if not exists seat_one_self_per_owner_idx on public.seat_boo
 create unique index if not exists live_student_unique_idx on public.seat_bookings(student_number) where mode='live';
 create table if not exists public.student_roster (
  student_number text primary key check(student_number ~ '^[0-9]{1,3}$'),
- email text not null unique check(char_length(email) <=254),
- constraint email_lowercase check (email=lower(email))
+ student_name text not null check(char_length(btrim(student_name)) between 1 and 80),
+ email text unique check(email is null or (char_length(email) <=254 and email=lower(email)))
 );
+alter table public.student_roster add column if not exists student_name text not null default '';
+alter table public.student_roster alter column email drop not null;
 create table if not exists public.classroom_admins (user_id uuid primary key references auth.users(id) on delete cascade);
 create table if not exists public.state_signal (id integer primary key check(id=1),version bigint not null default 0,updated_at timestamptz not null default now());
 insert into public.state_signal(id) values(1) on conflict do nothing;
@@ -147,6 +149,10 @@ begin
  select mode,case when mode='test' then test_opens_at else live_opens_at end into v_mode,v_opens from public.classroom_control where id=1;
  if clock_timestamp()<v_opens then return jsonb_build_object('ok',false,'error','ยังไม่ถึงเวลาเปิดจอง');end if;
  if v_no='' then return jsonb_build_object('ok',false,'error','กรุณาระบุเลขที่นักเรียน');end if;
+ if v_mode='live' and not exists(
+   select 1 from public.student_roster r
+   where r.student_number=v_no and lower(btrim(r.student_name))=lower(v_name)
+ ) then return jsonb_build_object('ok',false,'error','ชื่อและเลขที่ไม่ตรงกับรายชื่อนักเรียน');end if;
  if not exists(select 1 from public.seat_catalog where seat_id=p_seat and enabled) then return jsonb_build_object('ok',false,'error','ที่นั่งปิดใช้งาน');end if;
  if not exists(select 1 from public.seat_holds where mode=v_mode and seat_id=p_seat and owner_id=v_user and expires_at>clock_timestamp())
    then return jsonb_build_object('ok',false,'error','หมดเวลาล็อก กรุณาเลือกใหม่');end if;
@@ -166,7 +172,7 @@ begin
  select mode into v_mode from public.classroom_control where id=1;
  select public.public_snapshot() || jsonb_build_object(
  'reservations',coalesce((select jsonb_agg(jsonb_build_object('seat_id',seat_id,'student_name',student_name,'student_number',student_number,'booked_at',booked_at) order by seat_id) from public.seat_bookings where mode=v_mode),'[]'::jsonb),
- 'roster',coalesce((select jsonb_agg(jsonb_build_object('student_number',student_number,'email',email) order by student_number) from public.student_roster),'[]'::jsonb)
+ 'roster',coalesce((select jsonb_agg(jsonb_build_object('student_number',student_number,'student_name',student_name,'email',email) order by student_number) from public.student_roster),'[]'::jsonb)
  ) into v_result;
  return v_result;
 end $$;
@@ -226,22 +232,26 @@ begin
    if char_length(v_name) not between 1 and 80 or (v_no<>'' and v_no !~ '^[0-9]{1,3}$') then return false;end if;
    select owner_id into v_owner from public.seat_bookings where mode=v_mode and seat_id=p_seat;
    if v_owner is null then return false;end if;
-   if v_mode='live' and not exists(select 1 from public.student_roster r where r.student_number=v_no) then return false;end if;
+   if v_mode='live' and not exists(select 1 from public.student_roster r where r.student_number=v_no and lower(btrim(r.student_name))=lower(v_name)) then return false;end if;
    update public.seat_bookings set student_name=v_name,student_number=v_no where mode=v_mode and seat_id=p_seat;
  else return false;end if;
  perform public.bump_classroom_signal();return true;
 end $$;
-create or replace function public.admin_upsert_roster(p_number text,p_email text) returns boolean
+drop function if exists public.admin_upsert_roster(text,text);
+create or replace function public.admin_upsert_roster(p_number text,p_name text,p_email text default null) returns boolean
 language plpgsql security definer set search_path = '' as $$
-declare v_email text:=lower(btrim(coalesce(p_email,'')));
+declare v_name text:=btrim(coalesce(p_name,''));v_email text:=nullif(lower(btrim(coalesce(p_email,''))),'');
 begin
  if not public.is_classroom_admin() then raise exception 'admin only' using errcode='42501';end if;
- if p_number !~ '^[0-9]{1,3}$' or char_length(v_email)>254 or v_email !~ '^[^@ ]+@[^@ ]+\.[^@ ]+$' then return false;end if;
+ if p_number is null or p_number !~ '^[0-9]{1,3}$' or char_length(v_name) not between 1 and 80
+   or (v_email is not null and (char_length(v_email)>254 or v_email !~ '^[^@ ]+@[^@ ]+\.[^@ ]+$')) then return false;end if;
  perform pg_advisory_xact_lock(4242427001);
- -- If the email was assigned to another number, reassign it safely.
- delete from public.student_roster where email=v_email and student_number<>p_number;
- insert into public.student_roster(student_number,email) values(p_number,v_email)
- on conflict(student_number) do update set email=excluded.email;
+ if v_email is not null then
+   delete from public.student_roster where email=v_email and student_number<>p_number;
+ end if;
+ insert into public.student_roster(student_number,student_name,email) values(p_number,v_name,v_email)
+ on conflict(student_number) do update
+ set student_name=excluded.student_name,email=coalesce(excluded.email,public.student_roster.email);
  perform public.bump_classroom_signal();return true;
 end $$;
 create or replace function public.admin_remove_roster(p_number text) returns boolean
@@ -265,11 +275,11 @@ revoke all on function public.admin_set_opening(text,timestamptz) from public,an
 revoke all on function public.admin_reset_test() from public,anon,authenticated;
 revoke all on function public.admin_set_enabled(text,boolean) from public,anon,authenticated;
 revoke all on function public.admin_modify_reservation(text,text,text,text) from public,anon,authenticated;
-revoke all on function public.admin_upsert_roster(text,text) from public,anon,authenticated;
+revoke all on function public.admin_upsert_roster(text,text,text) from public,anon,authenticated;
 revoke all on function public.admin_remove_roster(text) from public,anon,authenticated;
 grant execute on function public.public_snapshot() to anon,authenticated;
 grant execute on function public.hold_seat(text),public.drop_hold(text),public.confirm_seat(text,text,text,boolean) to authenticated;
-grant execute on function public.admin_snapshot(),public.admin_set_mode(text),public.admin_set_opening(text,timestamptz),public.admin_reset_test(),public.admin_set_enabled(text,boolean),public.admin_modify_reservation(text,text,text,text),public.admin_upsert_roster(text,text),public.admin_remove_roster(text) to authenticated;
+grant execute on function public.admin_snapshot(),public.admin_set_mode(text),public.admin_set_opening(text,timestamptz),public.admin_reset_test(),public.admin_set_enabled(text,boolean),public.admin_modify_reservation(text,text,text,text),public.admin_upsert_roster(text,text,text),public.admin_remove_roster(text) to authenticated;
 
 -- Supabase Realtime. Falling back to polling every 2.5s works if Realtime is not enabled.
 do $$ begin
