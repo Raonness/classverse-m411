@@ -73,3 +73,22 @@ jobs:
 
       - name: Check patch whitespace
         run: git diff --check
+
+      - name: Install browser test runtime
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+
+      - name: Start local preview server
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/classverse-http.log 2>&1 &
+          echo $! > /tmp/classverse-http.pid
+          for attempt in $(seq 1 20); do
+            if curl --silent --fail http://127.0.0.1:4173/ > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/classverse-http.log
+          exit 1
+
+      - name: Run browser smoke tests
+        run: node tests/smoke.mjs
