@@ -1,7 +1,7 @@
 import { chromium } from 'playwright';
 
 const pages = [
-  { path: '/', heading: /ClassVerse|M\.4\/11/i },
+  { path: '/', heading: /ทุกเรื่อง|ห้องเรา/i },
   { path: '/booking/', heading: /จอง|ที่นั่ง|Booking/i },
   { path: '/seating/', heading: /รู้ตำแหน่ง|ที่นั่ง|Seating/i },
   { path: '/todo/', heading: /ลงมือทำ|งาน|ประกาศ|To-?Do/i }
@@ -27,7 +27,7 @@ try {
     if (await heading.count() === 0) {
       failures.push(`${route.path}: missing primary heading`);
     } else {
-      const text = await heading.innerText();
+      const text = (await heading.innerText()).replace(/\\s+/g, ' ').trim();
       if (!route.heading.test(text)) failures.push(`${route.path}: unexpected heading "${text}"`);
     }
     for (const error of pageErrors) failures.push(`${route.path}: uncaught browser error: ${error}`);
