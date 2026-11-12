@@ -67,8 +67,8 @@ function localAdminAction(fn,a){const d=clearExpired(getLocal()),mode=d.mode,id=
    else return false;
  }
  else if(fn==='admin_upsert_roster'){
-   const no=String(a.p_number||'').trim(),email=String(a.p_email||'').trim().toLowerCase();if(!/^\d{1,3}$/.test(no)||!/^\S+@\S+\.\S+$/.test(email))return false;
-   d.roster=d.roster.filter(r=>r.student_number!==no&&r.email!==email);d.roster.push({student_number:no,email});
+   const no=String(a.p_number||'').trim(),name=String(a.p_name||'').trim(),email=String(a.p_email||'').trim().toLowerCase();if(!/^\d{1,3}$/.test(no)||!name||name.length>80||(email&&!/^\S+@\S+\.\S+$/.test(email)))return false;
+   d.roster=d.roster.filter(r=>r.student_number!==no&&(!email||r.email!==email));d.roster.push({student_number:no,student_name:name,email});
  }else if(fn==='admin_remove_roster'){d.roster=d.roster.filter(r=>r.student_number!==a.p_number)}else return false;
  saveLocal(d);return true;
 }
@@ -161,7 +161,7 @@ document.querySelectorAll('[data-date-preset]').forEach(b=>b.addEventListener('c
 document.querySelectorAll('[data-time-preset]').forEach(b=>b.addEventListener('click',()=>{$('openingClock').value=b.dataset.timePreset;invalidateSchedule()}));
 async function adminChange(fn,args={}){if(adminBusy||!adminActive)return false;adminBusy=true;adminMsg('กำลังบันทึกข้อมูล…');try{const result=ONLINE?await rpc(fn,args):localAdminAction(fn,args);if(!result || result.ok===false){throw new Error(result?.error||'คำสั่งนี้ไม่สามารถทำได้')}await refresh(true);adminBusy=false;await loadAdmin();adminMsg('✓ บันทึกการเปลี่ยนแปลงแล้ว');return true}catch(e){adminMsg(safeError(e),true);return false}finally{adminBusy=false}}
 $('chooseTest').addEventListener('click',async()=>{if(!confirm('สลับไปพื้นที่ทดลอง? ระบบจะยกเลิกการล็อกชั่วคราว แต่ไม่ลบการจองจริง'))return;await adminChange('admin_set_mode',{p_mode:'test'})});
-$('chooseLive').addEventListener('click',async()=>{if(!confirm('สลับไปจองจริง? นักเรียนต้องยืนยันอีเมลและมีรายชื่อในระบบ'))return;await adminChange('admin_set_mode',{p_mode:'live'})});
+$('chooseLive').addEventListener('click',async()=>{if(!confirm('สลับไปจองจริง? นักเรียนต้องกรอกชื่อและเลขที่ให้ตรงกับรายชื่อที่ผู้ดูแลบันทึกไว้'))return;await adminChange('admin_set_mode',{p_mode:'live'})});
 $('resetTest').addEventListener('click',async()=>{if(!confirm('ต้องการล้างข้อมูลการทดลองทั้งหมดใช่ไหม? รายการทดลองทุกคนจะถูกลบ แต่รอบจริงไม่เปลี่ยน'))return;await adminChange('admin_reset_test')});
 $('scheduleForm').addEventListener('submit',async e=>{e.preventDefault();if(!verifiedScheduleISO){adminMsg('กรุณากดตรวจสอบเวลาก่อนยืนยัน',true);return}let d;try{d=parseScheduleDraft()}catch(err){adminMsg(err.message,true);invalidateSchedule();return}if(d.toISOString()!==verifiedScheduleISO){adminMsg('วันที่ถูกแก้ไข กรุณาตรวจสอบใหม่',true);invalidateSchedule();return}const confirmLabel=d.toLocaleString('th-TH',{timeZone:'Asia/Bangkok',dateStyle:'full',timeStyle:'medium'});if(!confirm('ยืนยันตั้งเวลาเปิดจองเป็น '+confirmLabel+' ใช่หรือไม่?'))return;const ok=await adminChange('admin_set_opening',{p_mode:adminData.mode,p_opens_at:verifiedScheduleISO});if(ok){scheduleDirty=false;setScheduleDraft(d);scheduleDirty=false;adminMsg('✓ ยืนยันเวลาเปิดจองแล้ว: '+confirmLabel)}});
 $('openInstant').addEventListener('click',async()=>{if(!confirm('ยืนยันเปิดจองทันทีในโหมด '+adminData.mode.toUpperCase()+' ?'))return;const ok=await adminChange('admin_set_opening',{p_mode:adminData.mode,p_opens_at:new Date(now()-1000).toISOString()});if(ok){scheduleDirty=false;loadAdmin()}});
