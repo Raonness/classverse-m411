@@ -24,7 +24,7 @@
 ## เปิดให้เพื่อนทดสอบพร้อมกันด้วย Supabase (ขั้นตอนจำเป็น)
 
 1. เข้า [Supabase](https://supabase.com/) สร้างโปรเจกต์ใหม่ (แนะนำแยกโปรเจกต์ทดสอบจากข้อมูลจริง)
-2. เปิด **Authentication → Providers → Anonymous Sign-ins** สำหรับ PUBLIC TEST; ตั้งค่า CAPTCHA / จำกัดการเข้าถึงตามเหมาะสมเพื่อป้องกันสแปม
+2. เปิด **Authentication → Providers → Anonymous Sign-ins** สำหรับ PUBLIC TEST และ LIVE (นักเรียนใช้ anonymous session อัตโนมัติ ไม่ต้องยืนยันอีเมล); ตั้งค่า CAPTCHA / จำกัดการเข้าถึงตามเหมาะสมเพื่อป้องกันสแปม
 3. เปิด **SQL Editor** แล้วรัน `supabase/schema.sql` **ในโปรเจกต์ใหม่** หากเป็นโปรเจกต์เดิมที่ติดตั้ง schema รุ่นก่อน ให้สำรองข้อมูลแล้วรัน `supabase/upgrade-live-roster-name.sql` ก่อนเผยแพร่โค้ดรุ่นนี้; หลัง migration ต้องแก้รายชื่อเดิมให้มีชื่อ–นามสกุลครบทุกคน (ชื่อว่างจะจอง LIVE ไม่ได้)
 4. ไปที่ **Project Settings → API** คัดลอก **Project URL** และ **publishable / anon key** มาใส่ `config.js` ดังนี้ (สองค่านี้ใช้เผยแพร่ในหน้าเว็บได้):
 
