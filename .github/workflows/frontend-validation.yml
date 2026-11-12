@@ -31,6 +31,9 @@ jobs:
           node --check todo/app.js
           node --check seating/swap-finder-fix.js
 
+      - name: Validate To-Do database and UI contracts
+        run: node tests/contracts.mjs
+
       - name: Validate HTML contracts and local assets
         run: |
           node --input-type=module <<'NODE'
