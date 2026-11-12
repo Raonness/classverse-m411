@@ -56,7 +56,7 @@ try {
   await page.locator('#reserveBtn').click();
   await page.locator('#confirmOverlay').waitFor({ state: 'visible' });
   await page.locator('#acceptConfirm').click();
-  await page.locator('#notice').getByText(/ชื่อและเลขที่ไม่ตรง/).waitFor();
+  await page.waitForFunction(() => document.querySelector('#notice').textContent.includes('ชื่อและเลขที่ไม่ตรง'));
 
   await page.locator('#studentName').fill('นักเรียน ตัวจริง');
   await page.locator('#studentNo').fill('12');
