@@ -25,6 +25,7 @@ jobs:
 
       - name: Check JavaScript syntax
         run: |
+          node --check assets/js/motion.js
           node --check app.js
           node --check booking/app.js
           node --check seating/app.js
