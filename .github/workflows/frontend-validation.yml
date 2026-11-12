@@ -95,3 +95,6 @@ jobs:
 
       - name: Run browser smoke tests
         run: node tests/smoke.mjs
+
+      - name: Run booking demo interaction test
+        run: node tests/booking-demo.mjs
