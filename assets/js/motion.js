@@ -93,6 +93,16 @@
     const isSuccess = !isError && /สำเร็จ|เรียบร้อย|บันทึกแล้ว|เผยแพร่รายการแล้ว|อนุมัติแล้ว|เพิ่มแล้ว|✓/i.test(message);
     node.classList.toggle("motion-feedback-error", isError && message.length > 0);
     node.classList.toggle("motion-feedback-success", isSuccess && message.length > 0);
+    if (isSuccess && message.length > 0 && !node.querySelector(".motion-checkmark")) {
+      const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      icon.setAttribute("viewBox", "0 0 24 24");
+      icon.setAttribute("class", "motion-checkmark");
+      icon.setAttribute("aria-hidden", "true");
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", "M4.5 12.5 9.5 17 19.5 6.5");
+      icon.append(path);
+      node.prepend(icon);
+    }
   }));
   document.querySelectorAll('[role="status"], .notice, .form-notice, .admin-notice').forEach(node =>
     feedbackObserver.observe(node, {childList:true, characterData:true, subtree:true}));
