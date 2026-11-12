@@ -27,7 +27,7 @@ try {
     if (await heading.count() === 0) {
       failures.push(`${route.path}: missing primary heading`);
     } else {
-      const text = (await heading.innerText()).replace(/\\s+/g, ' ').trim();
+      const text = (await heading.innerText()).replace(/\s+/g, ' ').trim();
       if (!route.heading.test(text)) failures.push(`${route.path}: unexpected heading "${text}"`);
     }
     for (const error of pageErrors) failures.push(`${route.path}: uncaught browser error: ${error}`);
@@ -40,7 +40,7 @@ try {
 }
 
 if (failures.length) {
-  console.error(failures.join('\\n'));
+  console.error(failures.join('\n'));
   process.exit(1);
 }
 console.log('All four pages passed the browser smoke test.');
