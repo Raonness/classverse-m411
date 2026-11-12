@@ -35,11 +35,42 @@ try {
   await page.locator('#adminBoard').waitFor({ state: 'visible' });
   assert.match(await page.locator('#adminCurrentMode').innerText(), /PUBLIC TEST/);
 
+  await page.locator('#adminBtn').click();
+  page.once('dialog', dialog => dialog.accept());
+  await page.locator('#chooseLive').click();
+  await page.locator('[data-tab="roster"]').click();
+  await page.locator('#rosterNo').fill('12');
+  await page.locator('#rosterName').fill('นักเรียน ตัวจริง');
+  await page.locator('#rosterEmail').fill('');
+  await page.locator('#rosterForm button[type="submit"]').click();
+  await page.locator('#rosterList').getByText(/12 · นักเรียน ตัวจริง/).waitFor();
+
+  await page.locator('[data-tab="schedule"]').click();
+  page.once('dialog', dialog => dialog.accept());
+  await page.locator('#openInstant').click();
+  await page.locator('#closeAdmin').click();
+
+  await page.locator('#seatGrid button.seat[aria-label^="โต๊ะ B1"]').click();
+  await page.locator('#studentName').fill('ชื่อไม่ตรง');
+  await page.locator('#studentNo').fill('12');
+  await page.locator('#reserveBtn').click();
+  await page.locator('#confirmOverlay').waitFor({ state: 'visible' });
+  await page.locator('#acceptConfirm').click();
+  await page.locator('#notice').getByText(/ชื่อและเลขที่ไม่ตรง/).waitFor();
+
+  await page.locator('#studentName').fill('นักเรียน ตัวจริง');
+  await page.locator('#studentNo').fill('12');
+  await page.locator('#reserveBtn').click();
+  await page.locator('#acceptConfirm').click();
+  await page.locator('#successOverlay').waitFor({ state: 'visible' });
+  assert.equal(await page.locator('#successSeat').innerText(), 'B1');
+  assert.equal(await page.locator('#emailForm').isHidden(), true);
+
   await page.setViewportSize({ width: 390, height: 844 });
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 3),
     'booking page should not overflow horizontally on mobile');
   assert.deepEqual(errors, []);
-  console.log('Booking demo interaction, reservation confirmation, admin access and mobile layout passed.');
+  console.log('Booking demo, LIVE roster name/number validation without student email, admin access and mobile layout passed.');
 } finally {
   await browser.close();
 }
