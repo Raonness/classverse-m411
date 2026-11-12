@@ -96,7 +96,9 @@ as $$
 $$;
 
 revoke all on function public.class_task_is_group_member(uuid) from public, anon;
-grant execute on function public.class_task_is_group_member(uuid) to authenticated;
+grant execute on function public.class_task_is_group_member(uuid) to anon, authenticated;
+-- Safe boolean check only; needed by the shared task SELECT policy for anonymous visitors.
+grant execute on function public.seatmap_is_admin() to anon, authenticated;
 
 drop policy if exists "class tasks visible public or assigned" on public.class_tasks;
 drop policy if exists "class tasks admin insert" on public.class_tasks;
