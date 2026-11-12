@@ -1,1 +1,145 @@
-<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ClassroomHub · ผังที่นั่งห้อง 11</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="seatmap.css?v=20261023audit1"><link rel="stylesheet" href="../motion.css?v=20261023r2"></head><body><div class="ambient a1"></div><div class="ambient a2"></div><div class="noise"></div><header class="shell topbar"><div class="brand"><div class="brand-symbol"><span>✳</span></div><div class="brand-words">CLASSROOM<span>HUB</span><small>SEATING DIRECTORY</small></div></div><div class="topbar-right"><span class="connection" id="connection">กำลังเชื่อมต่อ…</span><button class="ghost small" id="adminBtn">⚙ ผู้ดูแล</button></div></header><main class="shell"><nav class="cv-top-navigation" aria-label="ย้อนกลับ"><button class="cv-back-button" type="button" data-cv-back><span class="cv-back-icon" aria-hidden="true">←</span> กลับหน้าก่อนหน้า</button></nav><section class="intro"><div class="hero-text"><div class="eyebrow">✦ CLASSROOM 11 <span class="line"></span> LIVE SEATING MAP</div><h1>ที่นั่งของเรา<br><em>อยู่ตรงไหน</em><span class="period">.</span></h1><p>ดูตำแหน่งที่นั่งของทุกคนในห้อง และส่งคำขอย้ายไปที่ว่างหรือสลับที่นั่งเพื่อรอผู้ดูแลอนุมัติ</p><div class="hero-chips"><span>40 SEATS</span><span>ADMIN APPROVAL</span><span>LIVE UPDATE</span></div></div><div class="time-card"><div class="card-topline"><span class="kicker">CLASSROOM SEATING</span><span class="signal"><i></i> LIVE DIRECTORY</span></div><div class="time-heading">ผังที่นั่งปัจจุบัน</div><div class="summary"><strong id="occupied" data-cv-count>0</strong><span>/ 40 ที่นั่งมีรายชื่อแล้ว</span></div><p>คำขอย้ายไปที่ว่างหรือสลับที่นั่งจะไม่เปลี่ยนผังจนกว่าแอดมินจะอนุมัติ</p><div class="time-accent"></div></div></section><div class="stats"><div class="stat"><span class="stat-glyph">▦</span><div><small>ทั้งหมด</small><strong>40</strong></div></div><div class="stat"><span class="stat-glyph green">✓</span><div><small>มีผู้ใช้งาน</small><strong id="statBooked" data-cv-count>0</strong></div></div><div class="stat"><span class="stat-glyph lavender">◇</span><div><small>ว่าง</small><strong id="statFree" data-cv-count>40</strong></div></div></div><div class="workspace"><section class="panel floor-panel"><div class="section-top"><div><span class="kicker">01 / FIND YOUR PLACE</span><h2>แผนผังห้องเรียน <span class="tiny-star">✳</span></h2><p>ผัง A–J / 1–6 และทางเดินตรงตามเว็บเดิม</p></div><span class="section-tag">CLASSROOM 11</span></div><div class="stage"><div class="stage-top"><span>FRONT OF CLASSROOM</span><div class="board">✎ &nbsp; กระดานหน้าห้อง &nbsp; ✎</div><span>THE FRONT</span></div><div class="map-scroll" role="region" tabindex="0" aria-label="ผังที่นั่ง เลื่อนซ้ายขวาเพื่อดูทั้งหมด"><div class="seat-grid" id="seatGrid"></div><p class="map-swipe-tip" aria-hidden="true">↔ ปัดซ้าย–ขวาเพื่อดูที่นั่งทั้ง 40 ตำแหน่ง</p></div><div class="stage-bottom"><span>← ซ้าย</span><span>ทางเดินแสดงเป็นช่องว่างระหว่างกลุ่มโต๊ะ</span><span>ขวา →</span></div></div><div class="legend"><span><i class="legend-dot free"></i> ว่าง</span><span><i class="legend-dot booked"></i> มีรายชื่อแล้ว</span></div></section><aside class="panel booking-panel"><div class="section-top"><div><span class="kicker">02 / SEAT EXCHANGE</span><h2>ขอเปลี่ยนที่นั่ง</h2><p>เลือกที่นั่งว่างเพื่อย้าย หรือเลือกที่นั่งที่มีคนเพื่อขอสลับ โดยผู้ดูแลต้องอนุมัติก่อนทุกครั้ง</p></div></div><div class="reservation-pass"><div class="pass-top"><span>SELECTED SEAT</span><span>✳ CLASSROOMHUB</span></div><div class="pass-seat" id="selectedSeat">—</div><div class="pass-caption" id="selectedLabel">คลิกโต๊ะเพื่อดูรายชื่อ</div><div class="pass-divider"></div><div class="pass-bottom"><span><small>นักเรียน</small><strong id="selectedStudent">ยังไม่เลือก</strong></span></div></div><form id="swapForm"><label>ชื่อ–นามสกุลผู้ขอ</label><input id="requesterName" required maxlength="80" placeholder="ชื่อ–นามสกุล"><label>เลขที่ของผู้ขอ</label><input id="requesterNo" required inputmode="numeric" maxlength="3" placeholder="เช่น 2"><label>ต้องการไปที่นั่ง</label><select id="targetSeat" required><option value="">เลือกที่นั่งปลายทาง</option></select><label>เหตุผล (ไม่บังคับ)</label><input id="reason" maxlength="300" placeholder="เหตุผลที่ต้องการเปลี่ยนที่นั่ง"><button class="primary wide" type="submit">ส่งคำขอให้แอดมินอนุมัติ ↗</button></form><p id="notice" class="notice" role="status"></p><p class="admin-tip">คำขอเป็นเพียงการแจ้งความประสงค์ ไม่ใช่การยืนยันตัวตนของนักเรียน ผู้ดูแลควรตรวจสอบข้อมูลก่อนอนุมัติ</p></aside></div></main><div class="scrim" id="adminOverlay" hidden><div class="dialog admin-dialog"><button class="dialog-x" id="closeAdmin">×</button><div id="adminLogin"><div class="admin-icon">♛</div><div class="kicker">CONTROL ROOM ACCESS</div><h2>ศูนย์ควบคุมผู้ดูแล</h2><p>เฉพาะบัญชีผู้ดูแลที่กำหนดในฐานข้อมูล</p><form id="loginForm"><label>อีเมลผู้ดูแล</label><input id="email" type="email" required><label>รหัสผ่าน</label><input id="password" type="password" required><button class="primary wide">เข้าสู่ระบบ</button></form></div><div id="adminBoard" hidden><div class="admin-heading"><h2>จัดการผังที่นั่ง</h2><button id="logout" class="secondary">ออกจากระบบ</button></div><p>เพิ่มรายชื่อ ชื่อเล่น วันเกิด / แก้ไข / ย้าย / ลบ และพิจารณาคำขอเปลี่ยนที่นั่ง</p><form id="assignForm"><label>ที่นั่ง</label><select id="editSeat"></select><label for="editName">ชื่อ–นามสกุล (พิมพ์เพื่อค้นหาจากรายชื่อห้อง / ปล่อยว่างเพื่อลบ)</label><div class="roster-picker"><input id="editName" maxlength="80" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="studentSuggestions" placeholder="ค้นหาชื่อหรือเลขที่..."><div id="studentSuggestions" class="roster-suggestions" role="listbox" hidden></div></div><p class="roster-hint" id="rosterHint">รายชื่อจะแสดงเฉพาะเมื่อเข้าสู่ระบบแอดมินและติดตั้งรายชื่อแล้ว</p><label for="editNo">เลขที่</label><input id="editNo" inputmode="numeric" maxlength="3"><div class="student-profile-fields"><div><label for="editNickname">ชื่อเล่น (ไม่บังคับ)</label><input id="editNickname" maxlength="40" autocomplete="off" placeholder="ชื่อเล่นของนักเรียน"></div><div><label for="editBirthday">วันเกิด (ไม่บังคับ)</label><input id="editBirthday" type="date" autocomplete="off"></div></div><p class="admin-tip">ชื่อเล่นแสดงบนผังห้องเรียนได้ ส่วนวันเกิดจะไม่แสดงต่อสาธารณะ และมีเฉพาะแอดมินที่ได้รับสิทธิ์เท่านั้นที่อ่านและแก้ไขได้</p><label for="editReason">เหตุผลการแก้ไข (ไม่บังคับ)</label><input id="editReason" maxlength="500" autocomplete="off" placeholder="เช่น ย้ายที่นั่งตามผังใหม่ / แก้ข้อมูลตามที่แจ้ง"><p class="admin-tip">เหตุผลนี้จะถูกบันทึกในประวัติการเปลี่ยนแปลงแบบส่วนตัวสำหรับแอดมินเท่านั้น</p><button class="primary wide">บันทึกข้อมูลที่นั่ง</button></form><h3>คำขอรออนุมัติ</h3><div id="requests" class="admin-list"></div><h3>ประวัติการเปลี่ยนแปลง</h3><p class="audit-privacy">เฉพาะผู้ดูแลที่เข้าสู่ระบบเท่านั้น · แสดง 50 รายการล่าสุด</p><div id="auditLog" class="audit-log"></div></div><p id="adminNotice" class="notice"></p></div></div><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script src="config.js"></script><script src="seatmap.js?v=20261026empty1"></script><script src="../motion.js?v=20261023r2"></script><script src="../navigation.js?v=20261023r2"></script></body></html>
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f2f0e8">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="ผังที่นั่งห้อง ม.4/11 ดูตำแหน่งนักเรียนและส่งคำขอเปลี่ยนที่นั่ง">
+  <title>ผังห้องเรียน 4/11 | ClassVerse</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip-link" href="#seatMapTitle">ข้ามไปยังผังที่นั่ง</a>
+  <header class="shell topbar">
+    <a class="brand" href="../" aria-label="กลับไป ClassVerse">
+      <span class="brand-symbol" aria-hidden="true">11</span>
+      <span class="brand-words">CLASSVERSE<small>SEATING DIRECTORY · M.4/11</small></span>
+    </a>
+    <div class="topbar-right">
+      <span class="connection" id="connection" role="status">กำลังเชื่อมต่อ…</span>
+      <button class="ghost small" id="adminBtn" type="button">ผู้ดูแล</button>
+    </div>
+  </header>
+
+  <main class="shell">
+    <nav class="page-navigation" aria-label="เส้นทางนำทาง">
+      <a class="back-link" href="../#services">← กลับหน้าหลัก</a>
+      <span>02 / CLASS MAP</span>
+    </nav>
+
+    <section class="intro" aria-labelledby="pageTitle">
+      <div class="hero-text">
+        <p class="eyebrow"><span aria-hidden="true">✳</span> CLASSROOM 11 <span class="line"></span> LIVE SEATING MAP</p>
+        <h1 id="pageTitle">รู้ตำแหน่ง<br><em>ของทุกคน</em><span class="period">.</span></h1>
+        <p>ตรวจสอบผังที่นั่งปัจจุบันของห้อง หากต้องการเปลี่ยนที่นั่ง สามารถส่งคำขอให้ผู้ดูแลตรวจสอบและอนุมัติก่อนเปลี่ยนผังได้</p>
+        <div class="hero-chips"><span>40 POSITIONS</span><span>ADMIN APPROVAL</span><span>LIVE DIRECTORY</span></div>
+      </div>
+      <aside class="time-card" aria-label="สรุปจำนวนผู้มีที่นั่ง">
+        <div class="card-topline"><span class="kicker">CURRENT CLASS MAP</span><span class="signal"><i aria-hidden="true"></i> LIVE DIRECTORY</span></div>
+        <p class="time-heading">นักเรียนที่มีตำแหน่งแล้ว</p>
+        <p class="summary"><strong id="occupied" data-cv-count>0</strong><span>/ 40 ที่นั่ง</span></p>
+        <p class="time-card__note">คำขอย้ายหรือสลับที่นั่งจะยังไม่เปลี่ยนผัง จนกว่าผู้ดูแลจะอนุมัติ</p>
+      </aside>
+    </section>
+
+    <section class="stats" aria-label="ภาพรวมจำนวนที่นั่ง">
+      <article class="stat stat--total"><span class="stat-label">ตำแหน่งทั้งหมด</span><strong>40</strong></article>
+      <article class="stat stat--occupied"><span class="stat-label">มีรายชื่อแล้ว</span><strong id="statBooked" data-cv-count>0</strong></article>
+      <article class="stat stat--free"><span class="stat-label">ยังว่าง</span><strong id="statFree" data-cv-count>40</strong></article>
+    </section>
+
+    <div class="workspace">
+      <section class="panel floor-panel" aria-labelledby="seatMapTitle">
+        <header class="section-top">
+          <div><p class="kicker">01 / CURRENT SEATING</p><h2 id="seatMapTitle">แผนผังห้องเรียน</h2><p>มุมมองจากด้านหน้าห้อง · แตะตำแหน่งเพื่อดูรายละเอียด</p></div>
+          <span class="section-tag">ROOM 4/11</span>
+        </header>
+        <div class="stage">
+          <div class="stage-top"><span>FRONT OF CLASSROOM</span><p class="board">กระดานหน้าห้อง</p><span>THE FRONT</span></div>
+          <div class="map-scroll" role="region" tabindex="0" aria-label="ผังที่นั่ง เลื่อนแนวนอนเพื่อดูตำแหน่งทั้งหมด">
+            <div class="seat-grid" id="seatGrid" aria-label="ผังที่นั่ง 40 ตำแหน่ง"></div>
+            <p class="map-swipe-tip">เลื่อนซ้าย–ขวาเพื่อดูที่นั่งทั้งหมด</p>
+          </div>
+          <div class="stage-bottom"><span>ซ้าย</span><span>ช่องว่างแสดงทางเดินระหว่างกลุ่มโต๊ะ</span><span>ขวา</span></div>
+        </div>
+        <ul class="legend" aria-label="สัญลักษณ์ผังที่นั่ง">
+          <li><i class="legend-dot free" aria-hidden="true"></i> ว่าง</li>
+          <li><i class="legend-dot booked" aria-hidden="true"></i> มีรายชื่อแล้ว</li>
+        </ul>
+      </section>
+
+      <aside class="panel booking-panel" aria-labelledby="swapTitle">
+        <header class="section-top">
+          <div><p class="kicker">02 / SEAT EXCHANGE</p><h2 id="swapTitle">ขอเปลี่ยนที่นั่ง</h2><p>ส่งคำขอไปยังผู้ดูแลห้อง</p></div>
+        </header>
+        <article class="reservation-pass" aria-label="ตำแหน่งที่เลือก">
+          <div class="pass-top"><span>SELECTED SEAT</span><span>CLASSVERSE</span></div>
+          <strong class="pass-seat" id="selectedSeat">—</strong>
+          <p class="pass-caption" id="selectedLabel">คลิกตำแหน่งบนผังเพื่อดูรายชื่อ</p>
+          <div class="pass-divider"></div>
+          <div class="pass-bottom"><span><small>นักเรียน</small><strong id="selectedStudent">ยังไม่เลือก</strong></span></div>
+        </article>
+        <form id="swapForm">
+          <label for="requesterName">ชื่อ–นามสกุลผู้ขอ</label>
+          <input id="requesterName" required maxlength="80" autocomplete="name" placeholder="ชื่อ–นามสกุล">
+          <label for="requesterNo">เลขที่ของผู้ขอ</label>
+          <input id="requesterNo" required inputmode="numeric" maxlength="3" placeholder="เช่น 02">
+          <label for="targetSeat">ต้องการย้ายไปที่นั่ง</label>
+          <select id="targetSeat" required><option value="">เลือกที่นั่งปลายทาง</option></select>
+          <label for="reason">เหตุผล (ไม่บังคับ)</label>
+          <input id="reason" maxlength="300" placeholder="ระบุเหตุผลสั้น ๆ">
+          <button class="primary wide" type="submit">ส่งคำขอให้ผู้ดูแล <span aria-hidden="true">↗</span></button>
+        </form>
+        <p id="notice" class="notice" role="status" aria-live="polite"></p>
+        <p class="admin-tip">คำขอเป็นการแจ้งความประสงค์เท่านั้น ผู้ดูแลจะตรวจสอบชื่อและเลขที่ก่อนอนุมัติ</p>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="shell page-footer"><span>CLASSVERSE <b>·</b> M.4/11</span><a href="../">กลับสู่หน้าหลัก ↗</a></footer>
+
+  <div class="scrim" id="adminOverlay" hidden>
+    <section class="dialog admin-dialog" role="dialog" aria-modal="true" aria-labelledby="adminTitle">
+      <button class="dialog-x" id="closeAdmin" type="button" aria-label="ปิดหน้าต่าง">×</button>
+      <section id="adminLogin">
+        <p class="kicker">ADMIN ACCESS</p><h2 id="adminTitle">เข้าสู่ระบบผู้ดูแล</h2><p>ใช้บัญชีผู้ดูแลที่ได้รับสิทธิ์ในฐานข้อมูล</p>
+        <form id="loginForm">
+          <label for="email">อีเมลผู้ดูแล</label><input id="email" type="email" required autocomplete="username">
+          <label for="password">รหัสผ่าน</label><input id="password" type="password" required autocomplete="current-password">
+          <button class="primary wide" type="submit">เข้าสู่ระบบ</button>
+        </form>
+      </section>
+
+      <section id="adminBoard" hidden>
+        <header class="admin-heading"><div><p class="kicker">CLASSROOM CONTROL</p><h2>จัดการผังที่นั่ง</h2></div><button id="logout" class="secondary" type="button">ออกจากระบบ</button></header>
+        <p>แก้ไขรายชื่อ ตำแหน่ง และตรวจสอบคำขอเปลี่ยนที่นั่ง</p>
+        <form id="assignForm" class="admin-form">
+          <label for="editSeat">ตำแหน่งที่นั่ง</label><select id="editSeat"></select>
+          <label for="editName">ค้นหาชื่อนักเรียนจากรายชื่อห้อง</label>
+          <div class="roster-picker"><input id="editName" maxlength="80" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="studentSuggestions" placeholder="ค้นหาชื่อหรือเลขที่..."><div id="studentSuggestions" class="roster-suggestions" role="listbox" hidden></div></div>
+          <p class="roster-hint" id="rosterHint">รายชื่อจะแสดงเมื่อเข้าสู่ระบบผู้ดูแลและติดตั้งรายชื่อนักเรียนแล้ว</p>
+          <label for="editNo">เลขที่</label><input id="editNo" inputmode="numeric" maxlength="3">
+          <fieldset class="student-profile-fields"><legend>ข้อมูลเพิ่มเติม</legend><div><label for="editNickname">ชื่อเล่น (ไม่บังคับ)</label><input id="editNickname" maxlength="40" autocomplete="off" placeholder="ชื่อเล่น"></div><div><label for="editBirthday">วันเกิด (ไม่บังคับ)</label><input id="editBirthday" type="date" autocomplete="off"></div></fieldset>
+          <p class="admin-tip">ชื่อเล่นอาจแสดงบนผัง ส่วนวันเกิดเป็นข้อมูลส่วนตัวที่ผู้ดูแลเท่านั้นที่อ่านและแก้ไขได้</p>
+          <label for="editReason">เหตุผลการแก้ไข (ไม่บังคับ)</label><input id="editReason" maxlength="500" autocomplete="off" placeholder="เช่น ปรับผังตามที่ได้รับแจ้ง">
+          <p class="admin-tip">เหตุผลจะถูกบันทึกไว้ในประวัติการแก้ไขของผู้ดูแล</p>
+          <button class="primary wide" type="submit">บันทึกข้อมูลที่นั่ง</button>
+        </form>
+        <h3>คำขอรออนุมัติ</h3><div id="requests" class="admin-list"></div>
+        <h3>ประวัติการเปลี่ยนแปลง</h3><p class="audit-privacy">เฉพาะผู้ดูแล · 50 รายการล่าสุด</p><div id="auditLog" class="audit-log"></div>
+      </section>
+      <p id="adminNotice" class="notice" role="status" aria-live="polite"></p>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+  <script src="config.js" defer></script>
+  <script src="swap-finder-fix.js" defer></script>
+  <script src="app.js" defer></script>
+</body>
+</html>
