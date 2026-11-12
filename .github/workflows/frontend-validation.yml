@@ -42,16 +42,16 @@ jobs:
 
           for (const page of pages) {
             const source = readFileSync(page, 'utf8');
-            const ids = [...source.matchAll(/\\bid=["']([^"']+)["']/g)].map(match => match[1]);
+            const ids = [...source.matchAll(/\bid=["']([^"']+)["']/g)].map(match => match[1]);
             const duplicates = ids.filter((id, index) => ids.indexOf(id) !== index);
             if (duplicates.length) failures.push(`${page}: duplicate IDs: ${[...new Set(duplicates)].join(', ')}`);
 
-            if (/<style\\b/i.test(source) || /\\sstyle\\s*=/i.test(source)) failures.push(`${page}: inline CSS is not allowed`);
-            if (/<script\\b(?![^>]*\\bsrc=)[^>]*>/i.test(source)) failures.push(`${page}: inline JavaScript is not allowed`);
+            if (/<style\b/i.test(source) || /\sstyle\s*=/i.test(source)) failures.push(`${page}: inline CSS is not allowed`);
+            if (/<script\b(?![^>]*\bsrc=)[^>]*>/i.test(source)) failures.push(`${page}: inline JavaScript is not allowed`);
 
             const refs = [
-              ...[...source.matchAll(/<script\\b[^>]*\\bsrc=["']([^"']+)["']/gi)].map(match => match[1]),
-              ...[...source.matchAll(/<link\\b[^>]*\\bhref=["']([^"']+)["']/gi)].map(match => match[1])
+              ...[...source.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["']/gi)].map(match => match[1]),
+              ...[...source.matchAll(/<link\b[^>]*\bhref=["']([^"']+)["']/gi)].map(match => match[1])
             ];
 
             for (const ref of refs) {
@@ -65,7 +65,7 @@ jobs:
           }
 
           if (failures.length) {
-            console.error(failures.join('\\n'));
+            console.error(failures.join('\n'));
             process.exit(1);
           }
           console.log('All page contracts and local asset paths passed.');
