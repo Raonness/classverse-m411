@@ -39,7 +39,7 @@
   function filtered() {
     const query = $("searchInput").value.trim().toLowerCase();
     return records.filter(row => {
-      if (filter === "private" && row.audience === "public") return false;
+      if (filter === "private" && row.audience !== "private") return false;
       if (["announcement","activity","homework"].includes(filter) && row.task_type !== filter) return false;
       return !query || [row.title,row.details,row.subject,labels[row.task_type]].some(x => String(x||"").toLowerCase().includes(query));
     });
@@ -58,8 +58,8 @@
   }
 
   async function loadGroupAdminData(){
-    const [gRes,mRes,rRes,nRes]=await Promise.all([db.from("class_task_groups").select("*").order("name"),db.from("class_task_group_members").select("*"),db.from("student_roster").select("student_number,email").order("student_number"),db.from("seatmap_student_roster").select("student_number,student_name").order("student_number")]);
-    if(gRes.error||mRes.error||rRes.error||nRes.error){console.error(gRes.error||mRes.error||rRes.error||nRes.error);say($("groupNotice"),"โหลดกลุ่ม/รายชื่อนักเรียนไม่สำเร็จ โปรดตรวจสอบสิทธิ์ฐานข้อมูล",true);return;}
+    const [gRes,mRes,rRes,nRes]=await Promise.all([db.from("class_task_groups").select("*").order("name"),db.from("class_task_group_members").select("*"),db.from("class_task_student_accounts").select("student_number,email").order("student_number"),db.rpc("seatmap_public_snapshot")]);
+    if(gRes.error||mRes.error||rRes.error||nRes.error){console.error(gRes.error||mRes.error||rRes.error||nRes.error);say($("groupNotice"),"โหลดกลุ่ม/รายชื่อนักเรียนไม่สำเร็จ โปรดตรวจสอบ To-Do SQL และรายชื่อนักเรียน",true);return;}
     const nameMap=new Map((nRes.data||[]).map(s=>[String(s.student_number),s.student_name]));roster=(rRes.data||[]).map(s=>({...s,student_number:String(s.student_number),student_name:nameMap.get(String(s.student_number))||"นักเรียน"}));
     const memberRows=mRes.data||[];taskGroups=(gRes.data||[]).map(g=>({...g,members:memberRows.filter(m=>m.group_id===g.id)}));
     const opts=roster.map(s=>'<option value="'+esc(s.student_number)+'">'+esc(s.student_number+' · '+s.student_name+' · '+s.email)+'</option>').join("");$("groupMembers").innerHTML=opts;
