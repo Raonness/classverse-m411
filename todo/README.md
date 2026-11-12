@@ -8,6 +8,7 @@ Standalone module at `/todo/`, opened from the third card in the classroom menu.
 - Admin-only create/edit/delete, verified through the existing Class Room Map admin RPC.
 - Public tasks are visible to all visitors.
 - Private tasks are visible only to the assigned authenticated email and Admin; Postgres RLS enforces this.
+- Group tasks are visible only to mapped student accounts in the selected group and Admin; Postgres RLS enforces membership.
 - Uses the Class Room Map Supabase project/config, without changing the seat booking project or its records.
 
 ## Database
