@@ -113,3 +113,9 @@ label:has(input:focus), label:has(textarea:focus), label:has(select:focus) {
 .scrim:not([hidden]) .dialog, .modal-scrim:not([hidden]) .modal, .overlay:not([hidden]) [role="dialog"] { animation: cv-dialog-in 420ms var(--ease-spring) both; }
 @keyframes cv-overlay-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes cv-dialog-in { from { opacity: 0; transform: translateY(14px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+.motion-feedback-success::before { content: none; }
+.motion-checkmark { width: 1.15em; height: 1.15em; display: inline-block; margin-inline-end: .5em; vertical-align: -.2em; overflow: visible; color: var(--color-success); }
+.motion-checkmark path { fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 28; stroke-dashoffset: 28; animation: cv-check-draw 520ms var(--ease-out-expo) 80ms forwards; }
+@keyframes cv-check-draw { to { stroke-dashoffset: 0; } }
+.motion-feedback-error { animation: cv-feedback-in 420ms var(--ease-spring) both, cv-shake 360ms var(--ease-spring) 1; }
