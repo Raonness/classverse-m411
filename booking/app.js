@@ -1,7 +1,14 @@
 'use strict';
 /* ClassroomHub v9 — public test + production-oriented backend.
    All online bookings are confirmed atomically by server RPCs. */
-const $ = id => document.getElementById(id);
+const elements = new Map(Array.from(document.querySelectorAll("[id]"), element => [element.id, element]));
+const $ = id => elements.get(id) || document.getElementById(id);
+const requiredElements = ["acceptConfirm","accountBtn","accountLabel","adminBoard","adminBtn","adminCurrentMode","adminEmail","adminEmailFields","adminLogin","adminLoginForm","adminLoginHelp","adminLogout","adminOverlay","adminPass","adminPin","adminStatus","adminTime","bookAnother","bookForm","bookOther","bookSelf","bookingEditor","bookingScopeTip","bookingsList","cancelEdit","checkSchedule","chooseLive","chooseTest","clearBooking","clockNote","clockTime","closeAccount","closeAdmin","closeConfirm","confirmHint","confirmSchedule","connection","currentEmail","day","editBookingForm","editConfirm","editName","editNo","editorSeat","emailForm","findBooking","footerMode","holdBar","holdLeft","hour","minute","modeBadge","modeDescription","modeSession","modeTitle","myBookings","nameFieldLabel","numberFieldLabel","numberRequired","openInstant","openingClock","openingDay","openingYearBE","pinFields","previewTen","refreshAdmin","releaseBtn","reserveBtn","resetTest","reviewName","reviewNo","reviewSeat","reviewTime","reviewWho","rosterEmail","rosterForm","rosterList","rosterNo","scheduleForm","schedulePreview","seatGrid","seatsEditor","second","selectedLabel","selectedSeat","selectedState","signInEmail","signOut","statBooked","statFree","statHeld","statTotal","studentName","studentNo","successClose","successFootnote","successName","successParticles","successSeat","successText","timeHeading","timeSignal"];
+const missingElements = requiredElements.filter(id => !$(id));
+if (missingElements.length) {
+  console.error("ClassVerse booking page is missing required elements:", missingElements);
+  throw new Error("Booking interface could not start because its HTML contract is incomplete.");
+}
 const SEATS = ['A1','A2','A3','A4','A5','B1','B2','B3','B4','B5','C1','C2','C3','C4','C5','D1','D2','D3','D4','D5','E1','E2','E3','E4','E5','E6','F1','F2','F3','F4','F5','F6','G2','G3','G6','H2','H6','I2','J2','J3'];
 const COLS = 'ABCDEFGHIJ'.split('');
 const HOLD_MS = 120000, LOCAL_KEY = 'classroomhub_v7_store', OWNER_KEY = 'classroomhub_v7_owner';
