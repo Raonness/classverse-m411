@@ -3,8 +3,8 @@ import { chromium } from 'playwright';
 const pages = [
   { path: '/', heading: /ClassVerse|M\.4\/11/i },
   { path: '/booking/', heading: /จอง|ที่นั่ง|Booking/i },
-  { path: '/seating/', heading: /ผัง|ที่นั่ง|Seating/i },
-  { path: '/todo/', heading: /งาน|ประกาศ|To-?Do/i }
+  { path: '/seating/', heading: /รู้ตำแหน่ง|ที่นั่ง|Seating/i },
+  { path: '/todo/', heading: /ลงมือทำ|งาน|ประกาศ|To-?Do/i }
 ];
 
 const browser = await chromium.launch({ headless: true });
