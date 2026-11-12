@@ -35,7 +35,6 @@ try {
   await page.locator('#adminBoard').waitFor({ state: 'visible' });
   assert.match(await page.locator('#adminCurrentMode').innerText(), /PUBLIC TEST/);
 
-  await page.locator('#adminBtn').click();
   page.once('dialog', dialog => dialog.accept());
   await page.locator('#chooseLive').click();
   await page.locator('[data-tab="roster"]').click();
