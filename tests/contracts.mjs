@@ -21,4 +21,16 @@ assert.match(schema, /task group members admin only/i);
 assert.match(html, /id="groupMembers"/);
 assert.match(html, /id="assignedGroup"/);
 
-console.log('To-Do schema, roster RPC, group membership and UI contracts passed.');
+const booking = readFileSync('booking/app.js', 'utf8');
+const bookingSchema = readFileSync('booking/supabase/schema.sql', 'utf8');
+const bookingMigration = readFileSync('booking/supabase/upgrade-live-roster-name.sql', 'utf8');
+const bookingHtml = readFileSync('booking/index.html', 'utf8');
+assert.match(booking, /rosterName/);
+assert.match(booking, /ไม่ต้องยืนยันอีเมล/);
+assert.match(bookingSchema, /lower\(btrim\(r\.student_name\)\)=lower\(v_name\)/);
+assert.match(bookingMigration, /student_name text not null default ''/);
+assert.match(bookingMigration, /ชื่อและเลขที่ไม่ตรงกับรายชื่อนักเรียน/);
+assert.match(bookingHtml, /id="rosterName"/);
+assert.match(bookingHtml, /ไม่ต้องยืนยันอีเมล/);
+
+console.log('To-Do and booking database/UI contracts passed.');
