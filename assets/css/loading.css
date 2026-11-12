@@ -1,0 +1,40 @@
+/* ClassVerse · tiny classroom mascot loading screen */
+.cv-cute-loader {
+  position: fixed; inset: 0; z-index: 10000; display: grid; place-items: center;
+  padding: 24px; background: #f5f2e9; color: #35372f;
+  opacity: 1; visibility: visible; transition: opacity 420ms var(--ease-out-expo), visibility 420ms;
+  isolation: isolate; overflow: hidden;
+}
+.cv-cute-loader::before, .cv-cute-loader::after {
+  content: ""; position: absolute; border-radius: 50%; pointer-events: none; z-index: -1;
+  background: #e9e5d8; opacity: .62;
+}
+.cv-cute-loader::before { width: 340px; height: 340px; top: -145px; right: -100px; }
+.cv-cute-loader::after { width: 280px; height: 280px; bottom: -125px; left: -85px; background: #e4e9dd; }
+.cv-cute-loader.is-leaving { opacity: 0; visibility: hidden; pointer-events: none; }
+.cv-cute-loader__card { width: min(100%, 340px); text-align: center; padding: 30px 25px 25px; border: 1px solid #e6e1d5; border-radius: 28px; background: rgb(255 255 255 / 78%); box-shadow: 0 18px 60px rgb(54 53 42 / 7%); backdrop-filter: blur(10px); }
+.cv-cute-loader__art { width: 164px; height: 150px; margin: 0 auto 8px; overflow: visible; }
+.cv-cute-loader__cat { transform-origin: 82px 104px; animation: cv-cat-bob 1.55s var(--ease-in-out) infinite; }
+.cv-cute-loader__tail { transform-origin: 112px 90px; animation: cv-tail-wag 1.2s var(--ease-spring) infinite; }
+.cv-cute-loader__book-one { transform-origin: 82px 112px; animation: cv-book-breathe 1.8s var(--ease-in-out) infinite; }
+.cv-cute-loader__spark { transform-origin: center; animation: cv-sparkle 1.45s var(--ease-in-out) infinite; }
+.cv-cute-loader__spark--two { animation-delay: 420ms; }
+.cv-cute-loader__spark--three { animation-delay: 760ms; }
+.cv-cute-loader__title { margin: 0; font: 600 1.08rem/1.5 "Kanit", "DM Sans", system-ui, sans-serif; letter-spacing: .01em; }
+.cv-cute-loader__subtitle { margin: 5px 0 18px; color: #858477; font: 400 .82rem/1.65 "DM Sans", "Kanit", system-ui, sans-serif; }
+.cv-cute-loader__track { width: 100%; height: 5px; border-radius: 99px; overflow: hidden; background: #eae7de; }
+.cv-cute-loader__track span { display: block; width: 38%; height: 100%; border-radius: inherit; background: #9eae8e; animation: cv-loader-run 1.35s var(--ease-in-out) infinite; }
+.cv-cute-loader__dots { display: inline-flex; gap: 4px; margin-top: 13px; vertical-align: middle; }
+.cv-cute-loader__dots span { width: 4px; height: 4px; border-radius: 50%; background: #a0aa91; animation: cv-dot-hop 850ms var(--ease-spring) infinite; }
+.cv-cute-loader__dots span:nth-child(2) { animation-delay: 120ms; }
+.cv-cute-loader__dots span:nth-child(3) { animation-delay: 240ms; }
+@keyframes cv-cat-bob { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-6px) rotate(1deg); } }
+@keyframes cv-tail-wag { 0%, 100% { transform: rotate(-9deg); } 50% { transform: rotate(13deg); } }
+@keyframes cv-book-breathe { 0%, 100% { transform: rotate(-1deg) translateY(0); } 50% { transform: rotate(1deg) translateY(1px); } }
+@keyframes cv-sparkle { 0%, 100% { opacity: .45; transform: scale(.72) rotate(-8deg); } 50% { opacity: 1; transform: scale(1.12) rotate(12deg); } }
+@keyframes cv-loader-run { 0% { transform: translateX(-120%); } 100% { transform: translateX(360%); } }
+@keyframes cv-dot-hop { 0%, 100% { transform: translateY(0); opacity: .55; } 50% { transform: translateY(-4px); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .cv-cute-loader, .cv-cute-loader * { animation: none !important; transition-duration: .01ms !important; }
+  .cv-cute-loader__track span { width: 72%; }
+}
