@@ -158,3 +158,28 @@ input:focus, textarea:focus, select:focus, label:focus-within input, label:focus
   .motion-submitting::after, .motion-disabled::after, .motion-invalid { animation: none !important; }
   *, *::before, *::after { transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
+
+/* Added loading shimmer, floating focus labels, and status feedback. */
+.motion-dynamic-enter { opacity: 0; transform: translate3d(0, 12px, 0); }
+.motion-dynamic-active { animation: cv-enter 520ms var(--ease-out-expo) both; animation-delay: var(--motion-delay, 0ms); }
+.loading-card, .skeleton, [data-loading="true"] { position: relative; overflow: hidden; }
+.loading-card::after, .skeleton::after, [data-loading="true"]::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(105deg, transparent 20%, rgb(255 255 255 / 45%) 48%, transparent 76%);
+  transform: translateX(-110%); animation: cv-shimmer 1.45s var(--ease-in-out) infinite;
+}
+@keyframes cv-shimmer { to { transform: translateX(110%); } }
+label:has(+ input:focus), label:has(+ textarea:focus), label:has(+ select:focus),
+label:has(input:focus), label:has(textarea:focus), label:has(select:focus) {
+  color: var(--color-brand); transform: translateY(-2px);
+  transition: transform 220ms var(--ease-out-expo), color 220ms var(--ease-out-expo);
+}
+.motion-feedback-success, .motion-feedback-error {
+  animation: cv-feedback-in 420ms var(--ease-spring) both;
+  transform-origin: center left;
+}
+.motion-feedback-success { border-color: color-mix(in srgb, var(--color-success) 45%, var(--color-line)); }
+.motion-feedback-success::before { content: "✓"; display: inline-block; margin-inline-end: .5em; color: var(--color-success); animation: cv-check-pop 420ms var(--ease-spring) both; }
+.motion-feedback-error { border-color: color-mix(in srgb, var(--color-danger) 45%, var(--color-line)); }
+@keyframes cv-feedback-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes cv-check-pop { from { opacity: 0; transform: scale(.45) rotate(-25deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
