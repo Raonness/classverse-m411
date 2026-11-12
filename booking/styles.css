@@ -54,3 +54,19 @@
 .map-swipe-tip{display:none;color:#aeb9e0;font-size:11px;text-align:center;margin:9px 0 0;line-height:1.5}
 @media(max-width:850px){.map-swipe-tip{display:block}}
 @media(prefers-reduced-motion:reduce){.seat.cv-seat-clicked,.pass-seat.cv-selection-change{animation:none!important}}
+
+
+/* Simplified Buddhist Era date/time scheduler */
+.schedule-date-panel,.schedule-time-panel{display:grid;gap:11px;padding:15px;border:1px solid rgba(173,160,255,.2);border-radius:15px;background:rgba(255,255,255,.035)}
+.schedule-date-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;font-weight:750;color:#f0edff}
+.schedule-calendar-hint{font-size:10px;color:#aaa8cc;font-weight:500}
+.schedule-fields-modern{grid-template-columns:minmax(0,1fr) 105px;align-items:end}
+.schedule-year-preview{min-height:62px;border:1px solid rgba(180,169,255,.25);border-radius:11px;background:rgba(133,111,224,.12);display:grid;align-content:center;padding:8px 12px}
+.schedule-year-preview small{font-size:10px;color:#bcb6e3}
+.schedule-year-preview strong{font-size:22px;color:#e3d9ff;font-variant-numeric:tabular-nums}
+.schedule-time-fields{grid-template-columns:minmax(0,1fr) auto;align-items:end}
+.schedule-time-shortcuts{display:flex;gap:6px;flex-wrap:wrap}
+.schedule-time-shortcuts button{padding:10px 12px;font-size:11px}
+.schedule-date-panel .schedule-presets{margin-top:0}
+.schedule-fields input[type=date],.schedule-fields input[type=time]{min-height:46px}
+@media(max-width:570px){.schedule-fields-modern,.schedule-time-fields{grid-template-columns:1fr}.schedule-year-preview{min-height:54px}.schedule-time-shortcuts button{flex:1}}
