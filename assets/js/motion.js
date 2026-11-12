@@ -77,7 +77,7 @@
     const dynamicTargets = node.matches(".task-card, .loading-card, .empty-card, .notice, .dialog, .modal")
       ? [node] : node.querySelectorAll(".task-card, .loading-card, .empty-card, .notice, .dialog, .modal");
     dynamicTargets.forEach((element, index) => {
-      element.classList.add("motion-enter", "motion-dynamic-enter");
+      element.classList.add("motion-dynamic-enter");
       element.style.setProperty("--motion-delay", `${Math.min(index, 5) * 60}ms`);
       if (!reduceMotion) requestAnimationFrame(() => element.classList.add("motion-dynamic-active"));
     });
