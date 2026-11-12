@@ -232,7 +232,7 @@ begin
  else return false;end if;
  perform public.bump_classroom_signal();return true;
 end $$;
-drop function if exists public.admin_upsert_roster(text,text,text);
+drop function if exists public.admin_upsert_roster(text,text);
 create or replace function public.admin_upsert_roster(p_number text,p_name text,p_email text default null) returns boolean
 language plpgsql security definer set search_path = '' as $
 declare v_name text:=btrim(coalesce(p_name,''));v_email text:=nullif(lower(btrim(coalesce(p_email,''))),'');
