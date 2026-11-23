@@ -381,3 +381,76 @@ window.addEventListener("beforeunload", () => {
   releaseDownloadUrl("videoUrl");
   releaseDownloadUrl("pdfUrl");
 });
+
+function attachGlobalDropTarget() {
+  const overlay = byId("globalDropOverlay");
+  let dragDepth = 0;
+
+  const isFileDrag = (event) =>
+    Array.from(event.dataTransfer?.types || []).includes("Files");
+
+  const showOverlay = () => overlay.classList.add("is-visible");
+  const hideOverlay = () => {
+    dragDepth = 0;
+    overlay.classList.remove("is-visible");
+    document.querySelectorAll(".drop-label.is-dragover").forEach((node) => {
+      node.classList.remove("is-dragover");
+    });
+  };
+
+  document.addEventListener("dragenter", (event) => {
+    if (!isFileDrag(event)) return;
+    event.preventDefault();
+    dragDepth += 1;
+    showOverlay();
+  });
+
+  document.addEventListener("dragover", (event) => {
+    if (!isFileDrag(event)) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "copy";
+    showOverlay();
+  });
+
+  document.addEventListener("dragleave", (event) => {
+    if (!isFileDrag(event)) return;
+    dragDepth = Math.max(0, dragDepth - 1);
+    if (dragDepth === 0 && !event.relatedTarget) hideOverlay();
+  });
+
+  document.addEventListener("drop", (event) => {
+    if (!isFileDrag(event)) return;
+    event.preventDefault();
+    hideOverlay();
+
+    // Dedicated upload cards already process their own drop event.
+    if (event.target.closest?.(".upload-area")) return;
+
+    const file = event.dataTransfer.files?.[0];
+    if (!file) return;
+
+    const extension = file.name.toLowerCase();
+    const targetInput = extension.endsWith(".mp4")
+      ? byId("videoFile")
+      : extension.endsWith(".pdf")
+        ? byId("pdfFile")
+        : null;
+
+    if (!targetInput) {
+      setStatus("videoStatus", "รองรับเฉพาะไฟล์ MP4 และ PDF", "error");
+      setStatus("pdfStatus", "รองรับเฉพาะไฟล์ MP4 และ PDF", "error");
+      return;
+    }
+
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    targetInput.files = transfer.files;
+    targetInput.dispatchEvent(new Event("change", { bubbles: true }));
+    targetInput.closest(".tool-card")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  });
+
+  window.addEventListener("dragend", hideOverlay);
+  window.addEventListener("blur", hideOverlay);
+}
+
+attachGlobalDropTarget();
