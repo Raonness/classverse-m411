@@ -53,23 +53,23 @@ jobs:
           if (previousCommit && previousCommit !== sourceCommit) {
             try {
               changedFiles = execFileSync('git', ['diff', '--name-only', previousCommit, sourceCommit], { encoding: 'utf8' })
-                .split('\\n').map(file => file.trim()).filter(Boolean);
+                .split('\n').map(file => file.trim()).filter(Boolean);
             } catch (error) {
               console.log('Could not compare source commits; using commit subject only.');
             }
           }
           const areas = [
-            { test: /customize\\/(images|video-images|pdf-images)/, label: 'ระบบเลือกรูปภาพและแปลงไฟล์' },
-            { test: /customize\\//, label: 'เครื่องมือปรับแต่งไฟล์' },
-            { test: /assets\\/(css|js)\\//, label: 'หน้าตาและการทำงานของเว็บไซต์' },
-            { test: /updates\\//, label: 'หน้าประวัติการอัปเดต' },
-            { test: /(^|\\/)index\\.html$|pages?\\//, label: 'หน้าเว็บไซต์และเนื้อหา' },
-            { test: /\\.github\\/workflows\\//, label: 'ระบบเผยแพร่และอัตโนมัติ' }
+            { test: /customize\/(images|video-images|pdf-images)/, label: 'ระบบเลือกรูปภาพและแปลงไฟล์' },
+            { test: /customize\//, label: 'เครื่องมือปรับแต่งไฟล์' },
+            { test: /assets\/(css|js)\//, label: 'หน้าตาและการทำงานของเว็บไซต์' },
+            { test: /updates\//, label: 'หน้าประวัติการอัปเดต' },
+            { test: /(^|\/)index\.html$|pages?\//, label: 'หน้าเว็บไซต์และเนื้อหา' },
+            { test: /\.github\/workflows\//, label: 'ระบบเผยแพร่และอัตโนมัติ' }
           ];
           const detectedAreas = [...new Set(areas.filter(area => changedFiles.some(file => area.test.test(file))).map(area => area.label))];
           const title = detectedAreas.length
             ? 'ปรับปรุง' + detectedAreas.slice(0, 2).join(' และ ')
-            : (/^[\\u0E00-\\u0E7F]/.test(subject) ? subject : 'ปรับปรุงระบบ ClassVerse');
+            : (/^[\u0E00-\u0E7F]/.test(subject) ? subject : 'ปรับปรุงระบบ ClassVerse');
           const details = [
             ...(detectedAreas.length ? detectedAreas.map(area => 'ปรับปรุง' + area) : ['อัปเดตเว็บไซต์: ' + (subject || 'ปรับปรุงระบบ ClassVerse')]),
             ...(changedFiles.length ? ['อัปเดตไฟล์ที่เกี่ยวข้อง ' + changedFiles.length + ' ไฟล์'] : []),
