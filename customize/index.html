@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f2f0e8">
+  <meta name="description" content="เครื่องมือแปลงไฟล์ของ ClassVerse M.4/11 แปลงวิดีโอเป็นภาพและแปลง PDF เป็น PNG พร้อมดาวน์โหลด ZIP">
+  <title>ปรับแต่ง · เครื่องมือไฟล์ | ClassVerse M.4/11</title>
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="../assets/css/loading.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
+  <script src="../assets/js/loading.js" defer></script>
+  <script src="../assets/js/motion.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">ข้ามไปยังเครื่องมือ</a>
+  <header class="topbar shell">
+    <a class="brand" href="../" aria-label="กลับสู่ ClassVerse">
+      <span class="brand-mark" aria-hidden="true">11</span>
+      <span class="brand-name">CLASSVERSE<small>M.4/11 · FILE WORKSHOP</small></span>
+    </a>
+    <a class="back-link" href="../#services">← กลับเมนูหลัก</a>
+  </header>
+
+  <main class="shell" id="main-content">
+    <section class="intro" aria-labelledby="pageTitle">
+      <div class="intro-copy">
+        <p class="eyebrow"><span aria-hidden="true">✳</span> OPTION 04 · FILE WORKSHOP</p>
+        <h1 id="pageTitle">ปรับแต่ง<span>.</span></h1>
+        <p class="intro-description">รวมเครื่องมือแปลงไฟล์ที่ใช้บ่อยไว้ในที่เดียว เลือกรูปแบบผลลัพธ์ ตั้งค่าตามต้องการ แล้วดาวน์โหลดไฟล์ที่แปลงเสร็จได้ทันที</p>
+        <div class="intro-tags"><span>ทำงานในเบราว์เซอร์</span><span>ไม่อัปโหลดไฟล์ต้นฉบับ</span><span>ดาวน์โหลดเป็น ZIP</span></div>
+      </div>
+      <aside class="intro-index" aria-label="ประเภทเครื่องมือ">
+        <span>AVAILABLE TOOLS</span>
+        <strong>02</strong>
+        <small>VIDEO · DOCUMENT</small>
+      </aside>
+    </section>
+
+    <section class="tools-heading" aria-labelledby="toolsTitle">
+      <div>
+        <p class="eyebrow">CONVERT YOUR FILES</p>
+        <h2 id="toolsTitle">เลือกเครื่องมือ <span>ที่ต้องการใช้</span></h2>
+      </div>
+      <p>เครื่องมือชุดแรก · เพิ่มประเภทการแปลงได้ในภายหลัง</p>
+    </section>
+
+    <section class="tool-grid" aria-label="รายการเครื่องมือแปลงไฟล์">
+      <article class="tool-card tool-card--video" aria-labelledby="videoTitle">
+        <header class="tool-card-head">
+          <div class="tool-icon" aria-hidden="true"><span>▶</span></div>
+          <div class="tool-labels"><span>01 / VIDEO TO IMAGE</span><span class="tool-chip">MP4</span></div>
+        </header>
+        <div class="tool-copy">
+          <h3 id="videoTitle">แปลงวิดีโอเป็นรูปภาพ</h3>
+          <p>ดึงภาพจากวิดีโอ MP4 ตามช่วงเวลาที่กำหนด เลือก PNG หรือ JPG แล้วรวมรูปทั้งหมดเป็น ZIP</p>
+        </div>
+        <div class="upload-area">
+          <input class="file-input" id="videoFile" type="file" accept="video/mp4,.mp4" aria-describedby="videoFileHelp">
+          <label class="drop-label" for="videoFile">
+            <span class="upload-symbol" aria-hidden="true">＋</span>
+            <strong>เลือกไฟล์วิดีโอ MP4</strong>
+            <small id="videoFileHelp">แตะเพื่อเลือกไฟล์จากอุปกรณ์ · MP4</small>
+          </label>
+          <p class="selected-file" id="videoFileName">ยังไม่ได้เลือกไฟล์</p>
+        </div>
+        <div class="settings-grid">
+          <div class="field">
+            <label for="frameInterval">ดึงภาพทุก ๆ</label>
+            <div class="input-suffix"><input id="frameInterval" type="number" min="0.5" max="60" step="0.5" value="1"><span>วินาที</span></div>
+          </div>
+          <div class="field">
+            <label for="frameFormat">รูปแบบรูปภาพ</label>
+            <select id="frameFormat"><option value="png">PNG · คุณภาพสูง</option><option value="jpg">JPG · ไฟล์เล็กลง</option></select>
+          </div>
+        </div>
+        <div class="tool-actions">
+          <button class="primary-button" id="convertVideo" type="button" disabled>แปลงเป็นรูปภาพ <span aria-hidden="true">↗</span></button>
+          <p class="status" id="videoStatus" role="status" aria-live="polite">เลือกไฟล์เพื่อเริ่มต้น</p>
+          <progress class="progress" id="videoProgress" max="100" value="0" aria-label="ความคืบหน้าการแปลงวิดีโอ" hidden></progress>
+          <div class="result" id="videoResult" hidden>
+            <div><strong id="videoResultTitle">แปลงไฟล์สำเร็จ</strong><small id="videoResultMeta"></small></div>
+            <a class="download-button" id="videoDownload" href="#" download>ดาวน์โหลด ZIP ↓</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="tool-card tool-card--pdf" aria-labelledby="pdfTitle">
+        <header class="tool-card-head">
+          <div class="tool-icon" aria-hidden="true"><span>PDF</span></div>
+          <div class="tool-labels"><span>02 / PDF TO IMAGE</span><span class="tool-chip">PDF</span></div>
+        </header>
+        <div class="tool-copy">
+          <h3 id="pdfTitle">แปลง PDF เป็น PNG</h3>
+          <p>แปลงแต่ละหน้าในเอกสาร PDF เป็นภาพ PNG เลือกช่วงหน้าที่ต้องการและรวมภาพทั้งหมดไว้ใน ZIP</p>
+        </div>
+        <div class="upload-area">
+          <input class="file-input" id="pdfFile" type="file" accept="application/pdf,.pdf" aria-describedby="pdfFileHelp">
+          <label class="drop-label" for="pdfFile">
+            <span class="upload-symbol" aria-hidden="true">＋</span>
+            <strong>เลือกไฟล์ PDF</strong>
+            <small id="pdfFileHelp">แตะเพื่อเลือกเอกสารจากอุปกรณ์ · PDF</small>
+          </label>
+          <p class="selected-file" id="pdfFileName">ยังไม่ได้เลือกไฟล์</p>
+        </div>
+        <div class="settings-grid settings-grid--pdf">
+          <div class="field">
+            <label for="pdfStart">หน้าเริ่มต้น</label>
+            <input id="pdfStart" type="number" min="1" step="1" value="1">
+          </div>
+          <div class="field">
+            <label for="pdfEnd">หน้าสุดท้าย</label>
+            <input id="pdfEnd" type="number" min="1" step="1" placeholder="หน้าสุดท้ายของไฟล์">
+          </div>
+          <div class="field field--full">
+            <label for="pdfScale">ความละเอียดภาพ</label>
+            <select id="pdfScale"><option value="1">มาตรฐาน · 1×</option><option value="1.5" selected>คมชัด · 1.5×</option><option value="2">สูง · 2×</option></select>
+          </div>
+        </div>
+        <div class="tool-actions">
+          <button class="primary-button" id="convertPdf" type="button" disabled>แปลงเป็น PNG <span aria-hidden="true">↗</span></button>
+          <p class="status" id="pdfStatus" role="status" aria-live="polite">เลือกไฟล์เพื่อเริ่มต้น</p>
+          <progress class="progress" id="pdfProgress" max="100" value="0" aria-label="ความคืบหน้าการแปลง PDF" hidden></progress>
+          <div class="result" id="pdfResult" hidden>
+            <div><strong id="pdfResultTitle">แปลงไฟล์สำเร็จ</strong><small id="pdfResultMeta"></small></div>
+            <a class="download-button" id="pdfDownload" href="#" download>ดาวน์โหลด ZIP ↓</a>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="privacy-note" aria-label="ข้อมูลความเป็นส่วนตัว">
+      <span class="privacy-icon" aria-hidden="true">◎</span>
+      <div><strong>ไฟล์ของคุณยังอยู่บนอุปกรณ์</strong><p>การแปลงทำงานในเบราว์เซอร์ของคุณ ไฟล์ต้นฉบับจะไม่ถูกส่งไปจัดเก็บบนเซิร์ฟเวอร์ ClassVerse ควรเปิดหน้านี้ด้วยเบราว์เซอร์ที่รองรับไฟล์วิดีโอและ PDF</p></div>
+    </section>
+  </main>
+
+  <footer class="shell page-footer"><span>CLASSVERSE <b>·</b> M.4/11</span><span>FILE WORKSHOP · OPTION 04</span><a href="../">กลับหน้าหลัก ↗</a></footer>
+</body>
+</html>
