@@ -1,10 +1,15 @@
 "use strict";
 
-const MAX_OUTPUT_ITEMS = 100;
+const MAX_OUTPUT_ITEMS = 10000;
 const MAX_PDF_PIXELS = 30000000;
+const GALLERY_PAGE_SIZE = 48;
 
 const byId = (id) => document.getElementById(id);
-const state = { videoFile: null, pdfFile: null, videoUrl: null, pdfUrl: null, randomFiles: [], randomUrl: null, randomNames: [], randomSelected: new Set() };
+const state = {
+  videoFile: null, pdfFile: null, videoUrl: null, pdfUrl: null,
+  videoImages: [], pdfImages: [], videoPage: 0, pdfPage: 0,
+  randomFiles: [], randomUrl: null, randomNames: [], randomSelected: new Set(), randomPage: 0
+};
 
 function setStatus(id, message, kind) {
   const node = byId(id);
@@ -126,6 +131,99 @@ function handleFileSelection(inputId, nameId, buttonId, stateKey, acceptLabel, s
   });
 }
 
+ 
+function renderImageGallery(kind) {
+  const images = state[kind + "Images"];
+  const pageKey = kind + "Page";
+  const pageCount = Math.max(1, Math.ceil(images.length / GALLERY_PAGE_SIZE));
+  state[pageKey] = Math.max(0, Math.min(state[pageKey], pageCount - 1));
+  const start = state[pageKey] * GALLERY_PAGE_SIZE;
+  const gallery = byId(kind + "Gallery");
+  gallery.replaceChildren();
+
+  images.slice(start, start + GALLERY_PAGE_SIZE).forEach((entry, offset) => {
+    const index = start + offset;
+    const card = document.createElement("label");
+    card.className = "image-thumb";
+    const image = document.createElement("img");
+    image.src = entry.url;
+    image.alt = entry.name;
+    image.loading = "lazy";
+    const meta = document.createElement("span");
+    meta.className = "image-thumb-meta";
+    const check = document.createElement("input");
+    check.type = "checkbox";
+    check.checked = entry.selected;
+    check.addEventListener("change", () => {
+      entry.selected = check.checked;
+      card.classList.toggle("is-unselected", !check.checked);
+      updateImageSelectionUI(kind);
+    });
+    const name = document.createElement("span");
+    name.textContent = entry.name;
+    name.title = entry.name;
+    meta.append(check, name);
+    card.classList.toggle("is-unselected", !entry.selected);
+    card.append(image, meta);
+    gallery.append(card);
+  });
+
+  byId(kind + "PageInfo").textContent = "หน้า " + (state[pageKey] + 1) + " / " + pageCount;
+  byId(kind + "PrevPage").disabled = state[pageKey] === 0;
+  byId(kind + "NextPage").disabled = state[pageKey] >= pageCount - 1;
+  updateImageSelectionUI(kind);
+}
+
+function updateImageSelectionUI(kind) {
+  const images = state[kind + "Images"];
+  const selected = images.filter((entry) => entry.selected).length;
+  byId(kind + "SelectionCount").textContent = selected + " / " + images.length + " ภาพ";
+  byId(kind + "Download").disabled = selected === 0;
+}
+
+function setImageSelection(kind, selected) {
+  state[kind + "Images"].forEach((entry) => { entry.selected = selected; });
+  renderImageGallery(kind);
+}
+
+async function exportSelectedImages(kind) {
+  const images = state[kind + "Images"].filter((entry) => entry.selected);
+  if (!images.length) return;
+  const button = byId(kind + "Download");
+  button.disabled = true;
+  button.textContent = "กำลังสร้าง ZIP…";
+  try {
+    const zip = prepareZip();
+    images.forEach((entry) => zip.file(entry.name, entry.blob));
+    const output = await zip.generateAsync({ type: "blob" });
+    const urlKey = kind + "Url";
+    releaseDownloadUrl(urlKey);
+    state[urlKey] = URL.createObjectURL(output);
+    const link = document.createElement("a");
+    link.href = state[urlKey];
+    link.download = kind + "-selected-images.zip";
+    link.click();
+    setStatus(kind + "Status", "สร้าง ZIP จาก " + images.length + " ภาพเรียบร้อยแล้ว", "success");
+  } catch (error) {
+    setStatus(kind + "Status", error.message || "ไม่สามารถสร้าง ZIP ได้", "error");
+  } finally {
+    button.textContent = "สร้าง ZIP จากภาพที่เลือก ↓";
+    updateImageSelectionUI(kind);
+  }
+}
+
+function setupImageReview(kind) {
+  byId(kind + "PrevPage").addEventListener("click", () => {
+    state[kind + "Page"] -= 1;
+    renderImageGallery(kind);
+  });
+  byId(kind + "NextPage").addEventListener("click", () => {
+    state[kind + "Page"] += 1;
+    renderImageGallery(kind);
+  });
+  byId(kind + "Download").addEventListener("click", () => exportSelectedImages(kind));
+}
+
 async function convertVideo() {
   const file = state.videoFile;
   if (!file) return;
@@ -168,8 +266,8 @@ async function convertVideo() {
 
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    const zip = prepareZip();
     const extension = format === "jpg" ? "jpg" : "png";
+    const generatedImages = [];
     const mime = format === "jpg" ? "image/jpeg" : "image/png";
     const times = [];
     for (let time = 0; time < video.duration && times.length < MAX_OUTPUT_ITEMS; time += interval) times.push(time);
@@ -180,30 +278,19 @@ async function convertVideo() {
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
       const blob = await canvasToBlob(canvas, mime, format === "jpg" ? 0.92 : undefined);
       const frameName = "frame-" + String(index + 1).padStart(3, "0") + "." + extension;
-      zip.file(frameName, blob);
+      generatedImages.push({ name: frameName, blob, url: URL.createObjectURL(blob), selected: true });
       setProgress("videoProgress", ((index + 1) / times.length) * 90, true);
       setStatus("videoStatus", "กำลังสร้างภาพ " + (index + 1) + " / " + times.length, "working");
     }
 
-    const readme = [
-      "ClassVerse M.4/11 — Video to Image",
-      "Source: " + file.name,
-      "Frame interval: " + interval + " seconds",
-      "Image format: " + format.toUpperCase(),
-      "Video duration: " + video.duration.toFixed(2) + " seconds",
-      "Frames created: " + times.length
-    ].join("\n");
-    zip.file("INFO.txt", readme);
-
-    setStatus("videoStatus", "กำลังบีบอัดไฟล์เป็น ZIP", "working");
-    const output = await zip.generateAsync({ type: "blob" }, (meta) => {
-      setProgress("videoProgress", 90 + meta.percent * 0.1, true);
-    });
-    attachDownload(output, safeBaseName(file.name) + "-images.zip", "videoDownload", "videoUrl");
+    state.videoImages.forEach((entry) => URL.revokeObjectURL(entry.url));
+    state.videoImages = generatedImages;
+    state.videoPage = 0;
     byId("videoResultTitle").textContent = "แปลงวิดีโอสำเร็จ";
-    byId("videoResultMeta").textContent = times.length + " ภาพ · " + formatBytes(output.size);
+    byId("videoResultMeta").textContent = times.length + " ภาพ · ตรวจสอบภาพก่อนสร้าง ZIP";
     byId("videoResult").hidden = false;
-    setStatus("videoStatus", "เสร็จแล้ว ดาวน์โหลด ZIP ได้เลย", "success");
+    renderImageGallery("video");
+    setStatus("videoStatus", "แปลงเสร็จแล้ว ตรวจสอบและเลือกภาพก่อนสร้าง ZIP", "success");
     setProgress("videoProgress", 100, true);
   } catch (error) {
     setStatus("videoStatus", error.message || "เกิดข้อผิดพลาดระหว่างแปลงวิดีโอ", "error");
@@ -260,7 +347,7 @@ async function convertPdf() {
       throw new Error("เลือกได้ไม่เกิน " + MAX_OUTPUT_ITEMS + " หน้าต่อครั้ง กรุณาแบ่งแปลงเป็นหลายชุด");
     }
 
-    const zip = prepareZip();
+    const generatedImages = [];
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d", { alpha: false });
     if (!context) throw new Error("เบราว์เซอร์ไม่รองรับการสร้างภาพ PNG");
@@ -277,30 +364,21 @@ async function convertPdf() {
       await page.render({ canvasContext: context, viewport: viewport }).promise;
       const blob = await canvasToBlob(canvas, "image/png");
       const imageName = "page-" + String(pageNumber).padStart(3, "0") + ".png";
-      zip.file(imageName, blob);
+      generatedImages.push({ name: imageName, blob, url: URL.createObjectURL(blob), selected: true });
       page.cleanup();
       setProgress("pdfProgress", ((pageNumber - startPage + 1) / pageCount) * 88, true);
       setStatus("pdfStatus", "กำลังแปลงหน้า " + (pageNumber - startPage + 1) + " / " + pageCount, "working");
     }
     canvas.width = 0;
     canvas.height = 0;
-    zip.file("INFO.txt", [
-      "ClassVerse M.4/11 — PDF to PNG",
-      "Source: " + file.name,
-      "Pages: " + startPage + "–" + endPage,
-      "Resolution: " + scale + "x",
-      "Images created: " + pageCount
-    ].join("\n"));
-
-    setStatus("pdfStatus", "กำลังบีบอัดภาพเป็น ZIP", "working");
-    const output = await zip.generateAsync({ type: "blob" }, (meta) => {
-      setProgress("pdfProgress", 88 + meta.percent * 0.12, true);
-    });
-    attachDownload(output, safeBaseName(file.name) + "-png.zip", "pdfDownload", "pdfUrl");
+    state.pdfImages.forEach((entry) => URL.revokeObjectURL(entry.url));
+    state.pdfImages = generatedImages;
+    state.pdfPage = 0;
     byId("pdfResultTitle").textContent = "แปลง PDF สำเร็จ";
-    byId("pdfResultMeta").textContent = pageCount + " หน้า · " + formatBytes(output.size);
+    byId("pdfResultMeta").textContent = pageCount + " หน้า · ตรวจสอบภาพก่อนสร้าง ZIP";
     byId("pdfResult").hidden = false;
-    setStatus("pdfStatus", "เสร็จแล้ว ดาวน์โหลด ZIP ได้เลย", "success");
+    renderImageGallery("pdf");
+    setStatus("pdfStatus", "แปลงเสร็จแล้ว ตรวจสอบและเลือกภาพก่อนสร้าง ZIP", "success");
     setProgress("pdfProgress", 100, true);
   } catch (error) {
     const message = error && error.name === "PasswordException"
@@ -376,10 +454,14 @@ attachDragAndDrop("pdfFile");
 handleFileSelection("pdfFile", "pdfFileName", "convertPdf", "pdfFile", "PDF", "pdfStatus", "pdfResult");
 byId("convertVideo").addEventListener("click", convertVideo);
 byId("convertPdf").addEventListener("click", convertPdf);
+setupImageReview("video");
+setupImageReview("pdf");
 
 window.addEventListener("beforeunload", () => {
   releaseDownloadUrl("videoUrl");
   releaseDownloadUrl("pdfUrl");
+  state.videoImages.forEach((entry) => URL.revokeObjectURL(entry.url));
+  state.pdfImages.forEach((entry) => URL.revokeObjectURL(entry.url));
 });
 
 function attachGlobalDropTarget() {
@@ -483,7 +565,11 @@ function renderRandomPreview(regenerateNames = true) {
   }
   const list = byId("randomFileList");
   list.replaceChildren();
-  state.randomFiles.forEach((file, index) => {
+  const pageCount = Math.max(1, Math.ceil(state.randomFiles.length / GALLERY_PAGE_SIZE));
+  state.randomPage = Math.max(0, Math.min(state.randomPage, pageCount - 1));
+  const pageStart = state.randomPage * GALLERY_PAGE_SIZE;
+  state.randomFiles.slice(pageStart, pageStart + GALLERY_PAGE_SIZE).forEach((file, offset) => {
+    const index = pageStart + offset;
     const item = document.createElement("li");
     const checkbox = document.createElement("input");
     const oldName = document.createElement("span");
@@ -513,6 +599,9 @@ function renderRandomPreview(regenerateNames = true) {
   });
   byId("randomPreview").hidden = state.randomFiles.length === 0;
   byId("randomizeNames").disabled = state.randomFiles.length === 0;
+  byId("randomPageInfo").textContent = "หน้า " + (state.randomPage + 1) + " / " + pageCount;
+  byId("randomPrevPage").disabled = state.randomPage === 0;
+  byId("randomNextPage").disabled = state.randomPage >= pageCount - 1;
   updateRandomSelectionUI();
 }
 
@@ -520,6 +609,7 @@ function setRandomFiles(fileList) {
   const files = Array.from(fileList || []);
   if (!files.length) return;
   state.randomFiles = files;
+  state.randomPage = 0;
   state.randomSelected = new Set(files.map((_, index) => index));
   const totalSize = files.reduce((sum, file) => sum + file.size, 0);
   byId("randomFileName").textContent = files.length + " ไฟล์ · " + formatBytes(totalSize);
@@ -594,6 +684,8 @@ function attachRandomFilePicker() {
     state.randomSelected.clear();
     renderRandomPreview(false);
   });
+  byId("randomPrevPage").addEventListener("click", () => { state.randomPage -= 1; renderRandomPreview(false); });
+  byId("randomNextPage").addEventListener("click", () => { state.randomPage += 1; renderRandomPreview(false); });
   byId("downloadRandomZip").addEventListener("click", downloadRandomFiles);
 }
 
