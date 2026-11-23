@@ -111,15 +111,17 @@
         <div class="tool-actions">
           <button class="primary-button" id="convertVideo" type="button" disabled>แปลงเป็นรูปภาพ <span aria-hidden="true">↗</span></button>
           <p class="status" id="videoStatus" role="status" aria-live="polite">เลือกไฟล์เพื่อเริ่มต้น</p>
-          <progress class="progress" id="videoProgress" max="100" value="0" aria-label="ความคืบหน้าการแปลงวิดีโอ" hidden></progress>
+          <progress class="progress" id="videoProgress" max="100" value="0" aria-label="ความคืบหน้าการแปลงวิดีโอ" hidden>
+          <div class="image-bulk-actions" role="group" aria-label="จัดการรูปภาพที่เลือก">
+            <button type="button" class="image-bulk-button image-bulk-button--select" id="videoSelectAll" disabled>เลือกทั้งหมด</button>
+            <button type="button" class="image-bulk-button" id="videoClearAll" disabled>ยกเลิกเลือกทั้งหมด</button>
+            <button type="button" class="image-bulk-button image-bulk-button--zip" id="videoDownload" disabled>สร้าง ZIP จากภาพที่เลือก ↓</button>
+            <button type="button" class="image-bulk-button image-bulk-button--files" id="videoDownloadFiles" disabled>ดาวน์โหลดไฟล์ที่เลือก ↓</button>
+          </div>
+          <p class="image-bulk-help">ปุ่มเลือกและดาวน์โหลดจะพร้อมใช้งานเมื่อแปลงไฟล์และมีภาพผลลัพธ์แล้ว</p></progress>
           <div class="result result--stacked" id="videoResult" hidden>
             <div class="result-summary"><div><strong id="videoResultTitle">แปลงวิดีโอสำเร็จ</strong><small id="videoResultMeta"></small></div></div>
-            <section class="image-review" aria-label="ตัวอย่างภาพจากวิดีโอ"><div class="image-bulk-actions" role="group" aria-label="จัดการรูปภาพที่เลือก">
-<button type="button" class="image-bulk-button image-bulk-button--select" id="videoSelectAll">เลือกทั้งหมด</button>
-<button type="button" class="image-bulk-button" id="videoClearAll">ยกเลิกเลือกทั้งหมด</button>
-<button type="button" class="image-bulk-button image-bulk-button--zip" id="videoDownload">สร้าง ZIP จากภาพที่เลือก ↓</button>
-<button type="button" class="image-bulk-button image-bulk-button--files" id="videoDownloadFiles">ดาวน์โหลดไฟล์ที่เลือก ↓</button>
-</div><p class="image-bulk-help">เลือกภาพที่ต้องการ หรือใช้ปุ่มเลือกทั้งหมดและยกเลิกเลือกทั้งหมด</p><div class="image-review-heading"><strong>ตรวจสอบและเลือกรูปภาพ</strong><span id="videoSelectionCount">0 / 0 ภาพ</span></div><p>เลือกเฉพาะภาพที่ต้องการใส่ใน ZIP ได้ก่อนส่งออก</p><div class="image-gallery" id="videoGallery"></div><div class="gallery-pagination"><button type="button" id="videoPrevPage" class="text-button">← ก่อนหน้า</button><span id="videoPageInfo">หน้า 1</span><button type="button" id="videoNextPage" class="text-button">ถัดไป →</button></div></section>
+            <section class="image-review" aria-label="ตัวอย่างภาพจากวิดีโอ"><div class="image-review-heading"><strong>ตรวจสอบและเลือกรูปภาพ</strong><span id="videoSelectionCount">0 / 0 ภาพ</span></div><p>เลือกเฉพาะภาพที่ต้องการใส่ใน ZIP ได้ก่อนส่งออก</p><div class="image-gallery" id="videoGallery"></div><div class="gallery-pagination"><button type="button" id="videoPrevPage" class="text-button">← ก่อนหน้า</button><span id="videoPageInfo">หน้า 1</span><button type="button" id="videoNextPage" class="text-button">ถัดไป →</button></div></section>
           </div>
         </div>
       </article>
@@ -159,15 +161,17 @@
         <div class="tool-actions">
           <button class="primary-button" id="convertPdf" type="button" disabled>แปลงเป็น PNG <span aria-hidden="true">↗</span></button>
           <p class="status" id="pdfStatus" role="status" aria-live="polite">เลือกไฟล์เพื่อเริ่มต้น</p>
-          <progress class="progress" id="pdfProgress" max="100" value="0" aria-label="ความคืบหน้าการแปลง PDF" hidden></progress>
+          <progress class="progress" id="pdfProgress" max="100" value="0" aria-label="ความคืบหน้าการแปลง PDF" hidden>
+          <div class="image-bulk-actions" role="group" aria-label="จัดการรูปภาพที่เลือก">
+            <button type="button" class="image-bulk-button image-bulk-button--select" id="pdfSelectAll" disabled>เลือกทั้งหมด</button>
+            <button type="button" class="image-bulk-button" id="pdfClearAll" disabled>ยกเลิกเลือกทั้งหมด</button>
+            <button type="button" class="image-bulk-button image-bulk-button--zip" id="pdfDownload" disabled>สร้าง ZIP จากภาพที่เลือก ↓</button>
+            <button type="button" class="image-bulk-button image-bulk-button--files" id="pdfDownloadFiles" disabled>ดาวน์โหลดไฟล์ที่เลือก ↓</button>
+          </div>
+          <p class="image-bulk-help">ปุ่มเลือกและดาวน์โหลดจะพร้อมใช้งานเมื่อแปลงไฟล์และมีภาพผลลัพธ์แล้ว</p></progress>
           <div class="result result--stacked" id="pdfResult" hidden>
             <div class="result-summary"><div><strong id="pdfResultTitle">แปลง PDF สำเร็จ</strong><small id="pdfResultMeta"></small></div></div>
-            <section class="image-review" aria-label="ตัวอย่างภาพจาก PDF"><div class="image-bulk-actions" role="group" aria-label="จัดการรูปภาพที่เลือก">
-<button type="button" class="image-bulk-button image-bulk-button--select" id="pdfSelectAll">เลือกทั้งหมด</button>
-<button type="button" class="image-bulk-button" id="pdfClearAll">ยกเลิกเลือกทั้งหมด</button>
-<button type="button" class="image-bulk-button image-bulk-button--zip" id="pdfDownload">สร้าง ZIP จากภาพที่เลือก ↓</button>
-<button type="button" class="image-bulk-button image-bulk-button--files" id="pdfDownloadFiles">ดาวน์โหลดไฟล์ที่เลือก ↓</button>
-</div><p class="image-bulk-help">เลือกภาพที่ต้องการ หรือใช้ปุ่มเลือกทั้งหมดและยกเลิกเลือกทั้งหมด</p><div class="image-review-heading"><strong>ตรวจสอบและเลือกรูปภาพ</strong><span id="pdfSelectionCount">0 / 0 ภาพ</span></div><p>เลือกเฉพาะหน้าที่ต้องการใส่ใน ZIP ได้ก่อนส่งออก</p><div class="image-gallery" id="pdfGallery"></div><div class="gallery-pagination"><button type="button" id="pdfPrevPage" class="text-button">← ก่อนหน้า</button><span id="pdfPageInfo">หน้า 1</span><button type="button" id="pdfNextPage" class="text-button">ถัดไป →</button></div></section>
+            <section class="image-review" aria-label="ตัวอย่างภาพจาก PDF"><div class="image-review-heading"><strong>ตรวจสอบและเลือกรูปภาพ</strong><span id="pdfSelectionCount">0 / 0 ภาพ</span></div><p>เลือกเฉพาะหน้าที่ต้องการใส่ใน ZIP ได้ก่อนส่งออก</p><div class="image-gallery" id="pdfGallery"></div><div class="gallery-pagination"><button type="button" id="pdfPrevPage" class="text-button">← ก่อนหน้า</button><span id="pdfPageInfo">หน้า 1</span><button type="button" id="pdfNextPage" class="text-button">ถัดไป →</button></div></section>
           </div>
         </div>
       </article>
