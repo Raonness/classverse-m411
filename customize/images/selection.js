@@ -127,8 +127,8 @@
     }catch(error){setStatus(error.message||"สร้าง ZIP ไม่สำเร็จ","error")}
     finally{state.busy=false;updateControls()}
   }
-  $("sourceFiles").addEventListener("change",event=>handleFiles(event.target.files));
-  $("selectAll").addEventListener("click",()=>{filtered().forEach(({index})=>state.selected.add(index));render();setStatus("เลือกภาพที่ตรงกับรายการปัจจุบันทั้งหมดแล้ว")});
+  $("sourceFiles").addEventListener("change",event=>{const files=event.target.files;handleFiles(files);event.target.value="";});
+  $("selectAll").addEventListener("click",()=>{state.items.forEach((_,index)=>state.selected.add(index));render();setStatus("เลือกภาพทั้งหมดแล้ว")});
   $("clearAll").addEventListener("click",()=>{state.selected.clear();render();setStatus("ยกเลิกการเลือกทั้งหมดแล้ว")});
   $("exportSelected").addEventListener("click",exportSelected);
   $("searchInput").addEventListener("input",event=>{state.query=event.target.value;state.page=0;render()});
