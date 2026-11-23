@@ -88,7 +88,7 @@
         await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error("หมดเวลารอเฟรมวิดีโอ")),12000);const done=()=>{clearTimeout(timer);resolve()};video.addEventListener("seeked",done,{once:true});video.currentTime=time;if(Math.abs(video.currentTime-time)<.01&&video.readyState>=2)done();});
         ctx.drawImage(video,0,0,canvas.width,canvas.height);
         const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",.9));
-        if(blob)addItem(blob,sourceBaseName(arguments[0]?.name)+"_frame-"+String(i+1).padStart(5,"0")+".jpg",time.toFixed(2)+" วินาที");
+        if(blob)addItem(blob,sourceBaseName(file.name)+"_frame-"+String(i+1).padStart(5,"0")+".jpg",time.toFixed(2)+" วินาที");
         setStatus("กำลังดึงภาพ "+(i+1).toLocaleString("th-TH")+" / "+total.toLocaleString("th-TH"));
         if(i%8===0)await new Promise(requestAnimationFrame);
       }
