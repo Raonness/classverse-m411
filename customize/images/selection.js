@@ -13,7 +13,17 @@
   const state={items:[],selected:new Set(),page:0,pageSize:48,query:"",busy:false};
   const setStatus=(message,type)=>{const el=$("statusLine");el.textContent=message;el.dataset.state=type||""};
   const bytes=n=>{if(!n)return"0 B";const u=["B","KB","MB","GB"];const i=Math.min(Math.floor(Math.log(n)/Math.log(1024)),3);return(n/1024**i).toFixed(i?1:0)+" "+u[i]};
-  const cleanName=s=>s.replace(/[\\/:*?"<>|]+/g,"_").slice(0,100);
+  const cleanName=s=>String(s||"").replace(/[\\/:*?"<>|]+/g,"_").slice(0,180);
+  const sourceBaseName=fileName=>{const name=String(fileName||"");const dot=name.lastIndexOf(".");return cleanName(dot>0?name.slice(0,dot):name)||"converted-image"};
+  function uniqueNames(items){
+    const used=new Set();
+    return items.map(item=>{
+      const original=item.name;let candidate=original;let suffix=2;
+      const dot=original.lastIndexOf(".");const stem=dot>0?original.slice(0,dot):original;const extension=dot>0?original.slice(dot):"";
+      while(used.has(candidate.toLocaleLowerCase()))candidate=stem+" ("+(suffix++)+")"+extension;
+      used.add(candidate.toLocaleLowerCase());return candidate;
+    });
+  }
   function setupPage(){
     root.dataset.mode=mode;$("pageTitle").innerHTML=config.title+"<span>.</span>";$("pageDescription").textContent=config.desc;
     $("sourceTitle").textContent=config.heading;$("sourceEyebrow").textContent=config.eyebrow;
@@ -32,7 +42,7 @@
     $("exportFiles").disabled=!state.selected.size||state.busy;
     $("exportZip").textContent="ดาวน์โหลด ZIP ("+state.selected.size.toLocaleString("th-TH")+" ภาพ) ↓";
     $("exportFiles").textContent="ดาวน์โหลดไฟล์แยก ("+state.selected.size.toLocaleString("th-TH")+" ไฟล์) ↓";
-    $("selectAll").disabled=!state.items.length||state.busy;
+    $("selectAll").disabled=!state.items.length||state.busy||state.selected.size===state.items.length;
     $("clearAll").disabled=!state.selected.size||state.busy;
   }
   function filtered(){const q=state.query.toLocaleLowerCase();return state.items.map((item,index)=>({item,index})).filter(x=>x.item.name.toLocaleLowerCase().includes(q))}
@@ -78,7 +88,7 @@
         await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error("หมดเวลารอเฟรมวิดีโอ")),12000);const done=()=>{clearTimeout(timer);resolve()};video.addEventListener("seeked",done,{once:true});video.currentTime=time;if(Math.abs(video.currentTime-time)<.01&&video.readyState>=2)done();});
         ctx.drawImage(video,0,0,canvas.width,canvas.height);
         const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",.9));
-        if(blob)addItem(blob,"frame-"+String(i+1).padStart(5,"0")+".jpg",time.toFixed(2)+" วินาที");
+        if(blob)addItem(blob,sourceBaseName(arguments[0]?.name)+"_frame-"+String(i+1).padStart(5,"0")+".jpg",time.toFixed(2)+" วินาที");
         setStatus("กำลังดึงภาพ "+(i+1).toLocaleString("th-TH")+" / "+total.toLocaleString("th-TH"));
         if(i%8===0)await new Promise(requestAnimationFrame);
       }
@@ -96,7 +106,7 @@
       canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);
       await page.render({canvasContext:ctx,viewport}).promise;
       const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));
-      if(blob)addItem(blob,"page-"+String(pageNo).padStart(5,"0")+".png","หน้า "+pageNo);
+      if(blob)addItem(blob,sourceBaseName(file.name)+"_page-"+String(pageNo).padStart(5,"0")+".png","หน้า "+pageNo);
       setStatus("กำลังแปลงหน้า "+pageNo.toLocaleString("th-TH")+" / "+pdf.numPages.toLocaleString("th-TH"));
       if(pageNo%5===0)await new Promise(requestAnimationFrame);
     }
@@ -126,7 +136,9 @@
       if(!window.JSZip)throw new Error("โหลดระบบสร้าง ZIP ไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่");
       setStatus("กำลังเตรียม ZIP จาก "+indices.length.toLocaleString("th-TH")+" ภาพ…","working");
       const zip=new JSZip();
-      indices.forEach((index,position)=>{const item=state.items[index];zip.file(String(position+1).padStart(5,"0")+"-"+item.name,item.blob)});
+      const selectedItems=indices.map(index=>state.items[index]);
+      const downloadNames=uniqueNames(selectedItems);
+      selectedItems.forEach((item,position)=>zip.file(downloadNames[position],item.blob));
       const blob=await zip.generateAsync({type:"blob"},meta=>setStatus("กำลังบีบอัด "+Math.round(meta.percent)+"%","working"));
       const url=URL.createObjectURL(blob);const link=document.createElement("a");link.href=url;link.download=mode+"-selected-images.zip";document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
       setStatus("เตรียม ZIP แล้ว "+indices.length.toLocaleString("th-TH")+" ภาพ · "+bytes(blob.size),"success");
@@ -139,11 +151,13 @@
     state.busy=true;updateControls();
     try{
       setStatus("กำลังส่งไฟล์ที่เลือกไปยังการดาวน์โหลด…","working");
-      for(let position=0;position<indices.length;position++){
-        const item=state.items[indices[position]];
+      const selectedItems=indices.map(index=>state.items[index]);
+      const downloadNames=uniqueNames(selectedItems);
+      for(let position=0;position<selectedItems.length;position++){
+        const item=selectedItems[position];
         const link=document.createElement("a");
         link.href=item.url;
-        link.download=String(position+1).padStart(5,"0")+"-"+item.name;
+        link.download=downloadNames[position];
         link.style.display="none";
         document.body.append(link);link.click();link.remove();
         if(position%20===19){
@@ -158,8 +172,8 @@
     finally{state.busy=false;updateControls()}
   }
   $("sourceFiles").addEventListener("change",event=>{const files=event.target.files;handleFiles(files);event.target.value="";});
-  $("selectAll").addEventListener("click",()=>{state.items.forEach((_,index)=>state.selected.add(index));render();setStatus("เลือกภาพทั้งหมดแล้ว")});
-  $("clearAll").addEventListener("click",()=>{state.selected.clear();render();setStatus("ยกเลิกการเลือกทั้งหมดแล้ว")});
+  $("selectAll").addEventListener("click",()=>{state.items.forEach((_,index)=>state.selected.add(index));render();setStatus("เลือกภาพทั้งหมดในรายการแล้ว","success")});
+  $("clearAll").addEventListener("click",()=>{state.selected.clear();render();setStatus("ยกเลิกการเลือกทั้งหมดแล้ว","success")});
   $("exportZip").addEventListener("click",exportZip);\n  $("exportFiles").addEventListener("click",exportFiles);
   $("searchInput").addEventListener("input",event=>{state.query=event.target.value;state.page=0;render()});
   $("pageSize").addEventListener("change",event=>{state.pageSize=Number(event.target.value)||48;state.page=0;render()});
