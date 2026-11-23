@@ -174,7 +174,8 @@
   $("sourceFiles").addEventListener("change",event=>{const files=event.target.files;handleFiles(files);event.target.value="";});
   $("selectAll").addEventListener("click",()=>{state.items.forEach((_,index)=>state.selected.add(index));render();setStatus("เลือกภาพทั้งหมดในรายการแล้ว","success")});
   $("clearAll").addEventListener("click",()=>{state.selected.clear();render();setStatus("ยกเลิกการเลือกทั้งหมดแล้ว","success")});
-  $("exportZip").addEventListener("click",exportZip);\n  $("exportFiles").addEventListener("click",exportFiles);
+  $("exportZip").addEventListener("click",exportZip);
+  $("exportFiles").addEventListener("click",exportFiles);
   $("searchInput").addEventListener("input",event=>{state.query=event.target.value;state.page=0;render()});
   $("pageSize").addEventListener("change",event=>{state.pageSize=Number(event.target.value)||48;state.page=0;render()});
   $("previousPage").addEventListener("click",()=>{state.page--;render()});$("nextPage").addEventListener("click",()=>{state.page++;render()});
