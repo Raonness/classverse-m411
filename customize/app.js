@@ -517,6 +517,7 @@ function attachGlobalDropTarget() {
       : byId("randomFiles");
 
     if (assignFilesToInput(targetInput, files)) {
+      openToolWorkspace(targetInput.id === "videoFile" ? "video" : targetInput.id === "pdfFile" ? "pdf" : "random");
       targetInput.closest(".tool-card")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
   });
