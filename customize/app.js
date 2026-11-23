@@ -152,8 +152,10 @@ async function convertVideo() {
     video.preload = "auto";
     video.muted = true;
     video.playsInline = true;
+    const metadataReady = waitForMediaEvent(video, "loadedmetadata", 20000);
     video.src = sourceUrl;
-    await waitForMediaEvent(video, "loadedmetadata", 20000);
+    await metadataReady;
+    if (video.readyState < 2) await waitForMediaEvent(video, "loadeddata", 20000);
     if (!Number.isFinite(video.duration) || video.duration <= 0 || !video.videoWidth || !video.videoHeight) {
       throw new Error("ไม่สามารถอ่านความยาวหรือขนาดวิดีโอได้");
     }
