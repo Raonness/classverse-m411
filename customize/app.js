@@ -316,7 +316,63 @@ async function convertPdf() {
   }
 }
 
+
+function attachDragAndDrop(inputId) {
+  const input = byId(inputId);
+  const dropZone = input.closest(".upload-area").querySelector(".drop-label");
+  let dragDepth = 0;
+
+  const hasFiles = (event) => Array.from(event.dataTransfer?.types || []).includes("Files");
+
+  dropZone.addEventListener("dragenter", (event) => {
+    if (!hasFiles(event)) return;
+    event.preventDefault();
+    dragDepth += 1;
+    dropZone.classList.add("is-dragover");
+  });
+
+  dropZone.addEventListener("dragover", (event) => {
+    if (!hasFiles(event)) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "copy";
+    dropZone.classList.add("is-dragover");
+  });
+
+  dropZone.addEventListener("dragleave", (event) => {
+    if (!hasFiles(event)) return;
+    event.preventDefault();
+    dragDepth = Math.max(0, dragDepth - 1);
+    if (dragDepth === 0) dropZone.classList.remove("is-dragover");
+  });
+
+  dropZone.addEventListener("drop", (event) => {
+    if (!hasFiles(event)) return;
+    event.preventDefault();
+    dragDepth = 0;
+    dropZone.classList.remove("is-dragover");
+
+    const droppedFile = event.dataTransfer.files && event.dataTransfer.files[0];
+    if (!droppedFile) return;
+
+    // Reuse the native input/change validation path for dropped and browsed files.
+    const transfer = new DataTransfer();
+    transfer.items.add(droppedFile);
+    input.files = transfer.files;
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+
+  // Prevent the browser from opening a dropped file outside the upload zone.
+  window.addEventListener("dragover", (event) => {
+    if (hasFiles(event)) event.preventDefault();
+  });
+  window.addEventListener("drop", (event) => {
+    if (hasFiles(event)) event.preventDefault();
+  });
+}
+
 handleFileSelection("videoFile", "videoFileName", "convertVideo", "videoFile", "MP4", "videoStatus", "videoResult");
+attachDragAndDrop("videoFile");
+attachDragAndDrop("pdfFile");
 handleFileSelection("pdfFile", "pdfFileName", "convertPdf", "pdfFile", "PDF", "pdfStatus", "pdfResult");
 byId("convertVideo").addEventListener("click", convertVideo);
 byId("convertPdf").addEventListener("click", convertPdf);
