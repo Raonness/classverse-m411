@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f2f0e8">
-  <meta name="description" content="เครื่องมือแปลงไฟล์ของ ClassVerse M.4/11 แปลงวิดีโอเป็นภาพและแปลง PDF เป็น PNG พร้อมดาวน์โหลด ZIP">
+  <meta name="description" content="เครื่องมือแปลงไฟล์ของ ClassVerse M.4/11 แปลงไฟล์ เปลี่ยนชื่อไฟล์หลายรายการแบบสุ่ม พร้อมดาวน์โหลด ZIP">
   <title>ปรับแต่ง · เครื่องมือไฟล์ | ClassVerse M.4/11</title>
   <link rel="stylesheet" href="../assets/css/tokens.css">
   <link rel="stylesheet" href="style.css">
@@ -42,8 +42,8 @@
       </div>
       <aside class="intro-index" aria-label="ประเภทเครื่องมือ">
         <span>AVAILABLE TOOLS</span>
-        <strong>02</strong>
-        <small>VIDEO · DOCUMENT</small>
+        <strong>03</strong>
+        <small>VIDEO · DOCUMENT · RANDOM</small>
       </aside>
     </section>
 
@@ -135,6 +135,26 @@
             <div><strong id="pdfResultTitle">แปลงไฟล์สำเร็จ</strong><small id="pdfResultMeta"></small></div>
             <a class="download-button" id="pdfDownload" href="#" download>ดาวน์โหลด ZIP ↓</a>
           </div>
+        </div>
+      </article>
+
+      <article class="tool-card tool-card--random" aria-labelledby="randomTitle">
+        <header class="tool-card-head"><div class="tool-icon tool-icon--random" aria-hidden="true"><span>✳</span></div><div class="tool-labels"><span>03 / RANDOM RENAME</span><span class="tool-chip">BATCH</span></div></header>
+        <div class="tool-copy"><h3 id="randomTitle">Random · สุ่มชื่อไฟล์</h3><p>เปลี่ยนชื่อไฟล์หลายรายการพร้อมกันด้วยชื่อแบบสุ่ม โดยคงนามสกุลเดิมไว้ ดูตัวอย่างชื่อใหม่ก่อน แล้วดาวน์โหลดไฟล์ทั้งหมดเป็น ZIP</p></div>
+        <div class="upload-area">
+          <input class="file-input" id="randomFiles" type="file" multiple aria-describedby="randomFileHelp">
+          <label class="drop-label" for="randomFiles" id="randomDropLabel"><span class="upload-symbol" aria-hidden="true">＋</span><strong>เลือกไฟล์หลายรายการ</strong><small id="randomFileHelp">คลิกเพื่อเลือกหลายไฟล์ หรือ ลากไฟล์มาวางที่นี่</small></label>
+          <p class="selected-file" id="randomFileName">ยังไม่ได้เลือกไฟล์</p>
+        </div>
+        <div class="random-options">
+          <div class="field"><label for="randomNameLength">ความยาวชื่อสุ่ม</label><select id="randomNameLength"><option value="8">8 ตัวอักษร</option><option value="12" selected>12 ตัวอักษร</option><option value="16">16 ตัวอักษร</option><option value="20">20 ตัวอักษร</option></select></div>
+          <button class="secondary-button" id="randomizeNames" type="button" disabled>สุ่มชื่อใหม่อีกครั้ง ↻</button>
+        </div>
+        <div class="random-preview" id="randomPreview" hidden><div class="random-preview-head"><strong>ตัวอย่างชื่อไฟล์</strong><span id="randomCount">0 ไฟล์</span></div><ul class="random-file-list" id="randomFileList"></ul></div>
+        <div class="tool-actions">
+          <button class="primary-button" id="downloadRandomZip" type="button" disabled>ดาวน์โหลดไฟล์ที่เปลี่ยนชื่อแล้ว <span aria-hidden="true">↗</span></button>
+          <p class="status" id="randomStatus" role="status" aria-live="polite">เลือกไฟล์เพื่อเริ่มต้น</p>
+          <div class="result" id="randomResult" hidden><div><strong>เตรียมไฟล์เรียบร้อย</strong><small id="randomResultMeta"></small></div><a class="download-button" id="randomDownload" href="#" download>ดาวน์โหลด ZIP ↓</a></div>
         </div>
       </article>
     </section>
