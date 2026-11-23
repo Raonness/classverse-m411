@@ -4,7 +4,7 @@ const MAX_OUTPUT_ITEMS = 100;
 const MAX_PDF_PIXELS = 30000000;
 
 const byId = (id) => document.getElementById(id);
-const state = { videoFile: null, pdfFile: null, videoUrl: null, pdfUrl: null };
+const state = { videoFile: null, pdfFile: null, videoUrl: null, pdfUrl: null, randomFiles: [], randomUrl: null, randomNames: [] };
 
 function setStatus(id, message, kind) {
   const node = byId(id);
@@ -454,3 +454,121 @@ function attachGlobalDropTarget() {
 }
 
 attachGlobalDropTarget();
+
+
+function createRandomFilename(length, extension, usedNames) {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+  const bytes = new Uint8Array(length);
+  let candidate;
+  do {
+    crypto.getRandomValues(bytes);
+    candidate = Array.from(bytes, (value) => alphabet[value % alphabet.length]).join("") + extension;
+  } while (usedNames.has(candidate));
+  usedNames.add(candidate);
+  return candidate;
+}
+
+function splitFilename(filename) {
+  const dotIndex = filename.lastIndexOf(".");
+  return dotIndex <= 0
+    ? { extension: "" }
+    : { extension: filename.slice(dotIndex) };
+}
+
+function renderRandomPreview() {
+  const usedNames = new Set();
+  const length = Number(byId("randomNameLength").value);
+  state.randomNames = state.randomFiles.map((file) =>
+    createRandomFilename(length, splitFilename(file.name).extension, usedNames)
+  );
+  const list = byId("randomFileList");
+  list.replaceChildren();
+  state.randomFiles.forEach((file, index) => {
+    const item = document.createElement("li");
+    const oldName = document.createElement("span");
+    const arrow = document.createElement("span");
+    const newName = document.createElement("span");
+    oldName.className = "old-name";
+    oldName.textContent = file.name;
+    oldName.title = file.name;
+    arrow.className = "rename-arrow";
+    arrow.textContent = "→";
+    newName.className = "new-name";
+    newName.textContent = state.randomNames[index];
+    newName.title = state.randomNames[index];
+    item.append(oldName, arrow, newName);
+    list.append(item);
+  });
+  byId("randomCount").textContent = state.randomFiles.length + " ไฟล์";
+  byId("randomPreview").hidden = state.randomFiles.length === 0;
+  byId("randomizeNames").disabled = state.randomFiles.length === 0;
+  byId("downloadRandomZip").disabled = state.randomFiles.length === 0;
+  byId("randomResult").hidden = true;
+}
+
+function setRandomFiles(fileList) {
+  const files = Array.from(fileList || []);
+  if (!files.length) return;
+  state.randomFiles = files;
+  const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+  byId("randomFileName").textContent = files.length + " ไฟล์ · " + formatBytes(totalSize);
+  renderRandomPreview();
+  setStatus("randomStatus", "พร้อมสุ่มชื่อไฟล์ " + files.length + " รายการ", "success");
+}
+
+async function downloadRandomFiles() {
+  if (!state.randomFiles.length) return;
+  const button = byId("downloadRandomZip");
+  button.disabled = true;
+  byId("randomizeNames").disabled = true;
+  setStatus("randomStatus", "กำลังจัดเตรียมไฟล์ ZIP…", "working");
+  try {
+    if (state.randomNames.length !== state.randomFiles.length) renderRandomPreview();
+    const zip = prepareZip();
+    state.randomFiles.forEach((file, index) => zip.file(state.randomNames[index], file));
+    const output = await zip.generateAsync({ type: "blob" });
+    attachDownload(output, "random-renamed-files.zip", "randomDownload", "randomUrl");
+    byId("randomResultMeta").textContent = state.randomFiles.length + " ไฟล์ · " + formatBytes(output.size);
+    byId("randomResult").hidden = false;
+    setStatus("randomStatus", "เปลี่ยนชื่อไฟล์เรียบร้อยแล้ว ดาวน์โหลด ZIP ได้เลย", "success");
+  } catch (error) {
+    setStatus("randomStatus", error.message || "ไม่สามารถจัดเตรียมไฟล์ได้", "error");
+  } finally {
+    button.disabled = state.randomFiles.length === 0;
+    byId("randomizeNames").disabled = state.randomFiles.length === 0;
+  }
+}
+
+function attachRandomFilePicker() {
+  const input = byId("randomFiles");
+  const dropZone = byId("randomDropLabel");
+  input.addEventListener("change", () => setRandomFiles(input.files));
+  ["dragenter", "dragover"].forEach((eventName) => {
+    dropZone.addEventListener(eventName, (event) => {
+      if (!Array.from(event.dataTransfer?.types || []).includes("Files")) return;
+      event.preventDefault();
+      dropZone.classList.add("is-dragover");
+      event.dataTransfer.dropEffect = "copy";
+    });
+  });
+  ["dragleave", "drop"].forEach((eventName) => {
+    dropZone.addEventListener(eventName, (event) => {
+      if (!Array.from(event.dataTransfer?.types || []).includes("Files")) return;
+      event.preventDefault();
+      dropZone.classList.remove("is-dragover");
+    });
+  });
+  dropZone.addEventListener("drop", (event) => {
+    const files = event.dataTransfer?.files;
+    if (!files?.length) return;
+    const transfer = new DataTransfer();
+    Array.from(files).forEach((file) => transfer.items.add(file));
+    input.files = transfer.files;
+    setRandomFiles(input.files);
+  });
+  byId("randomNameLength").addEventListener("change", renderRandomPreview);
+  byId("randomizeNames").addEventListener("click", renderRandomPreview);
+  byId("downloadRandomZip").addEventListener("click", downloadRandomFiles);
+}
+
+attachRandomFilePicker();
