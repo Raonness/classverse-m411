@@ -199,3 +199,17 @@ body { background: var(--color-canvas); }
   .random-options { grid-template-columns: 1fr; }
   .random-file-list li { grid-template-columns: minmax(0, 1fr) 16px minmax(0, 1fr); gap: .35rem; padding-inline: .6rem; font-size: .62rem; }
 }
+
+
+/* Export selection for batch rename */
+.random-selection-actions { display: flex; flex-wrap: wrap; gap: .9rem; padding: .55rem .85rem 0; }
+.text-button { padding: .2rem 0; border: 0; color: var(--color-brand); background: transparent; font: 600 .72rem var(--font-body); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.text-button:focus-visible { outline: 2px solid var(--color-brand); outline-offset: 3px; }
+.random-selection-help { margin: .35rem .85rem .45rem; color: var(--color-muted); font-size: .68rem; }
+.random-file-list li { grid-template-columns: 22px minmax(0, 1fr) 16px minmax(0, 1fr); }
+.random-file-check { width: 17px; height: 17px; accent-color: var(--color-brand); cursor: pointer; }
+.random-file-list li.is-excluded { opacity: .48; }
+.random-file-list li.is-excluded .new-name { text-decoration: line-through; }
+@media (max-width: 520px) {
+  .random-file-list li { grid-template-columns: 20px minmax(0, 1fr) 12px minmax(0, 1fr); }
+}
