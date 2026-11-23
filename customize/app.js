@@ -8,6 +8,7 @@ const byId = (id) => document.getElementById(id);
 const state = {
   videoFile: null, pdfFile: null, videoUrl: null, pdfUrl: null,
   videoImages: [], pdfImages: [], videoPage: 0, pdfPage: 0,
+  videoDownloadBusy: false, pdfDownloadBusy: false,
   randomFiles: [], randomUrl: null, randomNames: [], randomSelected: new Set(), randomPage: 0
 };
 
@@ -178,7 +179,10 @@ function updateImageSelectionUI(kind) {
   const images = state[kind + "Images"];
   const selected = images.filter((entry) => entry.selected).length;
   byId(kind + "SelectionCount").textContent = selected + " / " + images.length + " ภาพ";
-  byId(kind + "Download").disabled = selected === 0;
+  byId(kind + "Download").disabled = selected === 0 || state[kind + "DownloadBusy"];
+  byId(kind + "DownloadFiles").disabled = selected === 0 || state[kind + "DownloadBusy"];
+  byId(kind + "SelectAll").disabled = images.length === 0 || selected === images.length || state[kind + "DownloadBusy"];
+  byId(kind + "ClearAll").disabled = selected === 0 || state[kind + "DownloadBusy"];
 }
 
 function setImageSelection(kind, selected) {
@@ -190,8 +194,9 @@ async function exportSelectedImages(kind) {
   const images = state[kind + "Images"].filter((entry) => entry.selected);
   if (!images.length) return;
   const button = byId(kind + "Download");
-  button.disabled = true;
+  state[kind + "DownloadBusy"] = true;
   button.textContent = "กำลังสร้าง ZIP…";
+  updateImageSelectionUI(kind);
   try {
     const zip = prepareZip();
     images.forEach((entry) => zip.file(entry.name, entry.blob));
@@ -207,7 +212,47 @@ async function exportSelectedImages(kind) {
   } catch (error) {
     setStatus(kind + "Status", error.message || "ไม่สามารถสร้าง ZIP ได้", "error");
   } finally {
+    state[kind + "DownloadBusy"] = false;
     button.textContent = "สร้าง ZIP จากภาพที่เลือก ↓";
+    updateImageSelectionUI(kind);
+  }
+}
+
+async function downloadSelectedImages(kind) {
+  const images = state[kind + "Images"].filter((entry) => entry.selected);
+  if (!images.length || state[kind + "DownloadBusy"]) return;
+  state[kind + "DownloadBusy"] = true;
+  const button = byId(kind + "DownloadFiles");
+  const originalLabel = button.textContent;
+  button.textContent = "กำลังเตรียมไฟล์…";
+  updateImageSelectionUI(kind);
+  try {
+    const usedNames = new Map();
+    for (let index = 0; index < images.length; index += 1) {
+      const entry = images[index];
+      const dot = entry.name.lastIndexOf(".");
+      const base = dot > 0 ? entry.name.slice(0, dot) : entry.name;
+      const extension = dot > 0 ? entry.name.slice(dot) : "";
+      const count = (usedNames.get(entry.name) || 0) + 1;
+      usedNames.set(entry.name, count);
+      const filename = count === 1 ? entry.name : base + " (" + count + ")" + extension;
+      const url = URL.createObjectURL(entry.blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1500);
+      await new Promise((resolve) => window.setTimeout(resolve, (index + 1) % 20 === 0 ? 250 : 80));
+      button.textContent = "กำลังดาวน์โหลด " + (index + 1) + " / " + images.length;
+    }
+    setStatus(kind + "Status", "เริ่มดาวน์โหลดภาพ " + images.length + " ไฟล์แล้ว", "success");
+  } catch (error) {
+    setStatus(kind + "Status", error.message || "ไม่สามารถดาวน์โหลดไฟล์ได้", "error");
+  } finally {
+    state[kind + "DownloadBusy"] = false;
+    button.textContent = originalLabel;
     updateImageSelectionUI(kind);
   }
 }
@@ -222,6 +267,9 @@ function setupImageReview(kind) {
     renderImageGallery(kind);
   });
   byId(kind + "Download").addEventListener("click", () => exportSelectedImages(kind));
+  byId(kind + "DownloadFiles").addEventListener("click", () => downloadSelectedImages(kind));
+  byId(kind + "SelectAll").addEventListener("click", () => setImageSelection(kind, true));
+  byId(kind + "ClearAll").addEventListener("click", () => setImageSelection(kind, false));
 }
 
 async function convertVideo() {
