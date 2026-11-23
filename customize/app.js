@@ -691,3 +691,48 @@ function attachRandomFilePicker() {
 }
 
 attachRandomFilePicker();
+
+
+function openToolWorkspace(toolName) {
+  const allowedTools = ["video", "pdf", "random"];
+  if (!allowedTools.includes(toolName)) return;
+
+  const picker = byId("toolPicker");
+  const workspace = byId("toolWorkspace");
+  const switcher = byId("workspaceSwitcher");
+  const privacyNote = byId("privacyNote");
+
+  picker.hidden = true;
+  workspace.hidden = false;
+  switcher.hidden = false;
+  privacyNote.hidden = false;
+
+  document.querySelectorAll("[data-tool-panel]").forEach((panel) => {
+    panel.hidden = panel.dataset.toolPanel !== toolName;
+  });
+  document.querySelectorAll("[data-compact-tool]").forEach((button) => {
+    if (button.dataset.compactTool === toolName) {
+      button.setAttribute("aria-current", "page");
+    } else {
+      button.removeAttribute("aria-current");
+    }
+  });
+
+  const heading = document.querySelector("[data-tool-panel='" + toolName + "'] h3");
+  if (heading) {
+    byId("toolWorkspace").setAttribute("aria-label", "พื้นที่ทำงาน: " + heading.textContent);
+  }
+  window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+}
+
+document.querySelectorAll("[data-open-tool]").forEach((button) => {
+  button.addEventListener("click", () => openToolWorkspace(button.dataset.openTool));
+});
+byId("backToToolPicker").addEventListener("click", () => {
+  byId("toolWorkspace").hidden = true;
+  byId("workspaceSwitcher").hidden = true;
+  byId("privacyNote").hidden = true;
+  byId("toolPicker").hidden = false;
+  document.querySelectorAll("[data-tool-panel]").forEach((panel) => { panel.hidden = true; });
+  window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+});
