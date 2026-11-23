@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f2f0e8">
+<meta name="description" content="เลือกรูปภาพแยกตามแหล่งที่มาใน ClassVerse">
+<title>เลือกรูปภาพ · ClassVerse M.4/11</title>
+<link rel="stylesheet" href="../../assets/css/tokens.css">
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="selection.css">
+<link rel="stylesheet" href="../../assets/css/loading.css">
+<link rel="stylesheet" href="../../assets/css/version.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
+<script src="../../assets/js/loading.js" defer></script>
+<script src="../../assets/js/motion.js" defer></script>
+<script src="selection.js" defer></script>
+<script src="../../assets/js/version.js" defer></script>
+</head>
+<body>
+<header class="topbar shell">
+<a class="brand" href="../../" aria-label="กลับสู่ ClassVerse"><span class="brand-mark">11</span><span class="brand-name">CLASSVERSE<small>M.4/11 · IMAGE WORKSHOP</small></span></a>
+<a class="back-link" href="../">← กลับเครื่องมือปรับแต่ง</a>
+</header>
+<main class="shell selection-shell" id="main-content" data-mode="upload">
+<section class="selection-intro">
+<p class="eyebrow">OPTION 04 · IMAGE SELECTION</p>
+<h1 id="pageTitle">เลือกรูปภาพ<span>.</span></h1>
+<p id="pageDescription">จัดการรูปภาพที่อัปโหลดแยกจากรูปภาพที่ได้จากการแปลงไฟล์</p>
+<div class="source-tabs" aria-label="ประเภทแหล่งที่มาของรูปภาพ">
+<a href="../images/" data-tab="upload">รูปภาพอัปโหลด</a>
+<a href="../video-images/" data-tab="video">จากวิดีโอ</a>
+<a href="../pdf-images/" data-tab="pdf">จาก PDF</a>
+</div>
+</section>
+<section class="selection-panel" aria-labelledby="sourceTitle">
+<div class="panel-heading"><div><p class="eyebrow" id="sourceEyebrow">SOURCE 01</p><h2 id="sourceTitle">รูปภาพที่อัปโหลด</h2></div><span class="selection-count" id="selectionCount">เลือกแล้ว 0 / 0</span></div>
+<div class="source-controls">
+<label class="file-picker" for="sourceFiles"><span aria-hidden="true">＋</span><strong id="pickerLabel">เลือกรูปภาพ</strong><small id="pickerHelp">เลือกได้หลายไฟล์พร้อมกัน หรือลากไฟล์มาวาง</small></label>
+<input id="sourceFiles" class="visually-hidden" type="file" multiple accept="image/*">
+<div class="conversion-settings" id="conversionSettings" hidden></div>
+<div class="toolbar">
+<label class="search-field"><span class="visually-hidden">ค้นหาชื่อไฟล์</span><input id="searchInput" type="search" placeholder="ค้นหาชื่อไฟล์…" autocomplete="off"></label>
+<label class="page-size-field">แสดง <select id="pageSize"><option>24</option><option selected>48</option><option>96</option><option>192</option></select> รายการ</label>
+</div>
+<div class="bulk-actions"><button type="button" class="action-button action-button--primary" id="selectAll">เลือกทั้งหมด</button><button type="button" class="action-button" id="clearAll">ยกเลิกการเลือกทั้งหมด</button><button type="button" class="action-button action-button--export" id="exportSelected" disabled>ดาวน์โหลด ZIP ที่เลือก ↓</button></div>
+</div>
+<p class="status-line" id="statusLine" role="status" aria-live="polite">ยังไม่มีรูปภาพ กรุณาเลือกไฟล์เพื่อเริ่มต้น</p>
+<div class="image-list" id="imageList" aria-live="polite"></div>
+<div class="empty-state" id="emptyState"><span aria-hidden="true">▧</span><strong>ยังไม่มีรูปภาพในรายการ</strong><p>เพิ่มไฟล์เพื่อแสดงตัวอย่างและเริ่มเลือกภาพ</p></div>
+<nav class="pagination" aria-label="เปลี่ยนหน้ารายการรูปภาพ"><button type="button" id="previousPage" disabled>← ก่อนหน้า</button><span id="pageInfo">หน้า 1 / 1</span><button type="button" id="nextPage" disabled>ถัดไป →</button></nav>
+</section>
+<aside class="selection-footnote"><strong>การเลือกแยกอิสระ</strong><p>รายการและสถานะการเลือกในหน้านี้แยกจากอีกสองหน้า ไม่มีการใช้รายการ ZIP หรือสถานะการเลือกร่วมกัน</p></aside>
+</main>
+<footer class="shell page-footer"><span>CLASSVERSE · M.4/11</span><span>IMAGE SELECTION · OPTION 04</span><a href="../../">กลับหน้าหลัก ↗</a></footer>
+</body></html>
