@@ -4,7 +4,7 @@ const MAX_OUTPUT_ITEMS = 100;
 const MAX_PDF_PIXELS = 30000000;
 
 const byId = (id) => document.getElementById(id);
-const state = { videoFile: null, pdfFile: null, videoUrl: null, pdfUrl: null, randomFiles: [], randomUrl: null, randomNames: [] };
+const state = { videoFile: null, pdfFile: null, videoUrl: null, pdfUrl: null, randomFiles: [], randomUrl: null, randomNames: [], randomSelected: new Set() };
 
 function setStatus(id, message, kind) {
   const node = byId(id);
@@ -426,27 +426,17 @@ function attachGlobalDropTarget() {
     // Dedicated upload cards already process their own drop event.
     if (event.target.closest?.(".upload-area")) return;
 
-    const file = event.dataTransfer.files?.[0];
-    if (!file) return;
+    const files = event.dataTransfer.files;
+    if (!files?.length) return;
+    const firstExtension = files[0].name.toLowerCase();
+    const allSameMediaType = files.length === 1 && (firstExtension.endsWith(".mp4") || firstExtension.endsWith(".pdf"));
+    const targetInput = allSameMediaType
+      ? (firstExtension.endsWith(".mp4") ? byId("videoFile") : byId("pdfFile"))
+      : byId("randomFiles");
 
-    const extension = file.name.toLowerCase();
-    const targetInput = extension.endsWith(".mp4")
-      ? byId("videoFile")
-      : extension.endsWith(".pdf")
-        ? byId("pdfFile")
-        : null;
-
-    if (!targetInput) {
-      setStatus("videoStatus", "รองรับเฉพาะไฟล์ MP4 และ PDF", "error");
-      setStatus("pdfStatus", "รองรับเฉพาะไฟล์ MP4 และ PDF", "error");
-      return;
+    if (assignFilesToInput(targetInput, files)) {
+      targetInput.closest(".tool-card")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
-
-    const transfer = new DataTransfer();
-    transfer.items.add(file);
-    targetInput.files = transfer.files;
-    targetInput.dispatchEvent(new Event("change", { bubbles: true }));
-    targetInput.closest(".tool-card")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   });
 
   window.addEventListener("dragend", hideOverlay);
@@ -475,19 +465,40 @@ function splitFilename(filename) {
     : { extension: filename.slice(dotIndex) };
 }
 
-function renderRandomPreview() {
+function updateRandomSelectionUI() {
+  const selectedCount = state.randomSelected.size;
+  const totalCount = state.randomFiles.length;
+  byId("randomCount").textContent = selectedCount + " / " + totalCount + " ไฟล์";
+  byId("downloadRandomZip").disabled = selectedCount === 0;
+  byId("randomResult").hidden = true;
+}
+
+function renderRandomPreview(regenerateNames = true) {
   const usedNames = new Set();
   const length = Number(byId("randomNameLength").value);
-  state.randomNames = state.randomFiles.map((file) =>
-    createRandomFilename(length, splitFilename(file.name).extension, usedNames)
-  );
+  if (regenerateNames || state.randomNames.length !== state.randomFiles.length) {
+    state.randomNames = state.randomFiles.map((file) =>
+      createRandomFilename(length, splitFilename(file.name).extension, usedNames)
+    );
+  }
   const list = byId("randomFileList");
   list.replaceChildren();
   state.randomFiles.forEach((file, index) => {
     const item = document.createElement("li");
+    const checkbox = document.createElement("input");
     const oldName = document.createElement("span");
     const arrow = document.createElement("span");
     const newName = document.createElement("span");
+    checkbox.type = "checkbox";
+    checkbox.className = "random-file-check";
+    checkbox.checked = state.randomSelected.has(index);
+    checkbox.setAttribute("aria-label", "เลือก " + file.name + " เพื่อส่งออก");
+    checkbox.addEventListener("change", () => {
+      if (checkbox.checked) state.randomSelected.add(index);
+      else state.randomSelected.delete(index);
+      item.classList.toggle("is-excluded", !checkbox.checked);
+      updateRandomSelectionUI();
+    });
     oldName.className = "old-name";
     oldName.textContent = file.name;
     oldName.title = file.name;
@@ -496,20 +507,20 @@ function renderRandomPreview() {
     newName.className = "new-name";
     newName.textContent = state.randomNames[index];
     newName.title = state.randomNames[index];
-    item.append(oldName, arrow, newName);
+    item.classList.toggle("is-excluded", !checkbox.checked);
+    item.append(checkbox, oldName, arrow, newName);
     list.append(item);
   });
-  byId("randomCount").textContent = state.randomFiles.length + " ไฟล์";
   byId("randomPreview").hidden = state.randomFiles.length === 0;
   byId("randomizeNames").disabled = state.randomFiles.length === 0;
-  byId("downloadRandomZip").disabled = state.randomFiles.length === 0;
-  byId("randomResult").hidden = true;
+  updateRandomSelectionUI();
 }
 
 function setRandomFiles(fileList) {
   const files = Array.from(fileList || []);
   if (!files.length) return;
   state.randomFiles = files;
+  state.randomSelected = new Set(files.map((_, index) => index));
   const totalSize = files.reduce((sum, file) => sum + file.size, 0);
   byId("randomFileName").textContent = files.length + " ไฟล์ · " + formatBytes(totalSize);
   renderRandomPreview();
@@ -523,19 +534,35 @@ async function downloadRandomFiles() {
   byId("randomizeNames").disabled = true;
   setStatus("randomStatus", "กำลังจัดเตรียมไฟล์ ZIP…", "working");
   try {
-    if (state.randomNames.length !== state.randomFiles.length) renderRandomPreview();
+    const selectedIndexes = Array.from(state.randomSelected).sort((a, b) => a - b);
+    if (!selectedIndexes.length) throw new Error("กรุณาเลือกอย่างน้อย 1 ไฟล์ก่อนส่งออก");
+    if (state.randomNames.length !== state.randomFiles.length) renderRandomPreview(false);
     const zip = prepareZip();
-    state.randomFiles.forEach((file, index) => zip.file(state.randomNames[index], file));
+    selectedIndexes.forEach((index) => zip.file(state.randomNames[index], state.randomFiles[index]));
     const output = await zip.generateAsync({ type: "blob" });
     attachDownload(output, "random-renamed-files.zip", "randomDownload", "randomUrl");
-    byId("randomResultMeta").textContent = state.randomFiles.length + " ไฟล์ · " + formatBytes(output.size);
+    byId("randomResultMeta").textContent = selectedIndexes.length + " / " + state.randomFiles.length + " ไฟล์ · " + formatBytes(output.size);
     byId("randomResult").hidden = false;
     setStatus("randomStatus", "เปลี่ยนชื่อไฟล์เรียบร้อยแล้ว ดาวน์โหลด ZIP ได้เลย", "success");
   } catch (error) {
     setStatus("randomStatus", error.message || "ไม่สามารถจัดเตรียมไฟล์ได้", "error");
   } finally {
-    button.disabled = state.randomFiles.length === 0;
+    button.disabled = state.randomSelected.size === 0;
     byId("randomizeNames").disabled = state.randomFiles.length === 0;
+  }
+}
+
+function assignFilesToInput(input, files) {
+  if (!files || !files.length) return false;
+  try {
+    const transfer = new DataTransfer();
+    Array.from(files).forEach((file) => transfer.items.add(file));
+    input.files = transfer.files;
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+    return true;
+  } catch (error) {
+    setStatus("randomStatus", "เบราว์เซอร์นี้ไม่รองรับการวางไฟล์ กรุณาใช้ปุ่มเลือกไฟล์แทน", "error");
+    return false;
   }
 }
 
@@ -543,31 +570,30 @@ function attachRandomFilePicker() {
   const input = byId("randomFiles");
   const dropZone = byId("randomDropLabel");
   input.addEventListener("change", () => setRandomFiles(input.files));
-  ["dragenter", "dragover"].forEach((eventName) => {
-    dropZone.addEventListener(eventName, (event) => {
-      if (!Array.from(event.dataTransfer?.types || []).includes("Files")) return;
-      event.preventDefault();
-      dropZone.classList.add("is-dragover");
-      event.dataTransfer.dropEffect = "copy";
-    });
+  dropZone.addEventListener("dragover", (event) => {
+    if (!Array.from(event.dataTransfer?.types || []).includes("Files")) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "copy";
+    dropZone.classList.add("is-dragover");
   });
-  ["dragleave", "drop"].forEach((eventName) => {
-    dropZone.addEventListener(eventName, (event) => {
-      if (!Array.from(event.dataTransfer?.types || []).includes("Files")) return;
-      event.preventDefault();
-      dropZone.classList.remove("is-dragover");
-    });
-  });
+  dropZone.addEventListener("dragleave", () => dropZone.classList.remove("is-dragover"));
   dropZone.addEventListener("drop", (event) => {
-    const files = event.dataTransfer?.files;
-    if (!files?.length) return;
-    const transfer = new DataTransfer();
-    Array.from(files).forEach((file) => transfer.items.add(file));
-    input.files = transfer.files;
-    setRandomFiles(input.files);
+    if (!Array.from(event.dataTransfer?.types || []).includes("Files")) return;
+    event.preventDefault();
+    event.stopPropagation();
+    dropZone.classList.remove("is-dragover");
+    assignFilesToInput(input, event.dataTransfer.files);
   });
-  byId("randomNameLength").addEventListener("change", renderRandomPreview);
-  byId("randomizeNames").addEventListener("click", renderRandomPreview);
+  byId("randomNameLength").addEventListener("change", () => renderRandomPreview(true));
+  byId("randomizeNames").addEventListener("click", () => renderRandomPreview(true));
+  byId("selectAllRandom").addEventListener("click", () => {
+    state.randomSelected = new Set(state.randomFiles.map((_, index) => index));
+    renderRandomPreview(false);
+  });
+  byId("clearRandomSelection").addEventListener("click", () => {
+    state.randomSelected.clear();
+    renderRandomPreview(false);
+  });
   byId("downloadRandomZip").addEventListener("click", downloadRandomFiles);
 }
 
