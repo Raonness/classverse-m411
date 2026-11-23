@@ -63,6 +63,7 @@ jobs:
             { test: /customize\//, label: 'เครื่องมือปรับแต่งไฟล์' },
             { test: /assets\/(css|js)\//, label: 'หน้าตาและการทำงานของเว็บไซต์' },
             { test: /updates\//, label: 'หน้าประวัติการอัปเดต' },
+            { test: /assets\/data\/version\.json/, label: 'ระบบเวอร์ชันและประวัติการอัปเดต' },
             { test: /(^|\/)index\.html$|pages?\//, label: 'หน้าเว็บไซต์และเนื้อหา' },
             { test: /\.github\/workflows\//, label: 'ระบบเผยแพร่และอัตโนมัติ' }
           ];
