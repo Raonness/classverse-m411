@@ -176,3 +176,26 @@ body { background: var(--color-canvas); }
 @media (prefers-reduced-motion: reduce) {
   .global-drop-overlay { transition: none; }
 }
+
+
+/* Random batch renaming tool */
+.tool-card--random { grid-column: 1 / -1; border-top: 3px solid #9a7440; }
+.tool-icon--random { background: #9a7440; }
+.random-options { display: grid; grid-template-columns: minmax(150px, .7fr) minmax(180px, 1fr); align-items: end; gap: .8rem; margin-top: .9rem; }
+.secondary-button { min-height: 43px; padding: .55rem .8rem; border: 1px solid var(--color-line-strong); border-radius: 3px; color: var(--color-brand); background: transparent; font-size: .78rem; font-weight: 600; cursor: pointer; transition: background .2s, border-color .2s; }
+.secondary-button:hover:not(:disabled) { border-color: var(--color-brand); background: var(--color-brand-soft); }
+.secondary-button:disabled { opacity: .4; cursor: not-allowed; }
+.random-preview { margin-top: 1rem; border: 1px solid var(--color-line); background: #faf9f4; }
+.random-preview-head { display: flex; justify-content: space-between; gap: 1rem; padding: .7rem .85rem; border-bottom: 1px solid var(--color-line); }
+.random-preview-head strong { font-size: .78rem; }
+.random-preview-head span { color: var(--color-muted); font-size: .7rem; }
+.random-file-list { max-height: 220px; overflow: auto; display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.random-file-list li { display: grid; grid-template-columns: minmax(0, 1fr) 22px minmax(0, 1fr); align-items: center; gap: .5rem; padding: .55rem .85rem; border-bottom: 1px solid var(--color-line); font-size: .68rem; }
+.random-file-list li:last-child { border-bottom: 0; }
+.random-file-list .old-name { color: var(--color-muted); overflow-wrap: anywhere; }
+.random-file-list .rename-arrow { color: var(--color-accent); text-align: center; }
+.random-file-list .new-name { color: var(--color-brand); font-weight: 600; overflow-wrap: anywhere; }
+@media (max-width: 520px) {
+  .random-options { grid-template-columns: 1fr; }
+  .random-file-list li { grid-template-columns: minmax(0, 1fr) 16px minmax(0, 1fr); gap: .35rem; padding-inline: .6rem; font-size: .62rem; }
+}
