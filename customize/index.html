@@ -50,12 +50,33 @@
     </section>
 
 
-    <section class="selection-shortcuts" aria-labelledby="selectionShortcutsTitle">
-      <div><p class="eyebrow">IMAGE SELECTION · THREE SEPARATE PAGES</p><h2 id="selectionShortcutsTitle">เลือกรูปภาพ <span>แยกตามแหล่งที่มา</span></h2><p>แต่ละหน้ามีรายการและสถานะการเลือกของตัวเอง ไม่ใช้ ZIP หรือรายการที่เลือกร่วมกัน</p></div>
-      <div class="selection-shortcut-grid">
-        <a href="images/"><span>01 / UPLOAD</span><strong>รูปภาพที่อัปโหลด</strong><small>เลือกภาพจากอุปกรณ์โดยตรง ↗</small></a>
-        <a href="video-images/"><span>02 / VIDEO</span><strong>รูปภาพจากวิดีโอ</strong><small>แปลง MP4 และเลือกเฟรม ↗</small></a>
-        <a href="pdf-images/"><span>03 / PDF</span><strong>รูปภาพจาก PDF</strong><small>แปลงหน้า PDF และเลือกภาพ ↗</small></a>
+    <section class="tool-picker" id="toolPicker" aria-labelledby="toolPickerTitle">
+      <div class="tool-picker-heading">
+        <p class="eyebrow">CHOOSE A WORKSPACE</p>
+        <h2 id="toolPickerTitle">เลือกเครื่องมือ <span>ที่ต้องการใช้งาน</span></h2>
+        <p>เลือกหนึ่งรายการเพื่อเปิดพื้นที่ทำงาน เครื่องมืออื่นจะถูกซ่อนไว้จนกว่าจะสลับไปใช้งาน</p>
+      </div>
+      <div class="tool-picker-grid">
+        <button class="tool-choice tool-choice--video" type="button" data-open-tool="video">
+          <span class="tool-choice-number">01</span><span class="tool-choice-icon" aria-hidden="true">▶</span>
+          <strong>แปลงวิดีโอเป็นรูปภาพ</strong><small>VIDEO TO IMAGE · MP4</small><span class="tool-choice-arrow" aria-hidden="true">↗</span>
+        </button>
+        <button class="tool-choice tool-choice--pdf" type="button" data-open-tool="pdf">
+          <span class="tool-choice-number">02</span><span class="tool-choice-icon" aria-hidden="true">PDF</span>
+          <strong>แปลง PDF เป็นรูปภาพ PNG</strong><small>PDF TO PNG · DOCUMENT</small><span class="tool-choice-arrow" aria-hidden="true">↗</span>
+        </button>
+        <button class="tool-choice tool-choice--random" type="button" data-open-tool="random">
+          <span class="tool-choice-number">03</span><span class="tool-choice-icon" aria-hidden="true">✳</span>
+          <strong>สุ่มเปลี่ยนชื่อไฟล์</strong><small>RANDOM RENAME · BATCH</small><span class="tool-choice-arrow" aria-hidden="true">↗</span>
+        </button>
+      </div>
+    </section>
+    <section class="workspace-switcher" id="workspaceSwitcher" aria-label="สลับเครื่องมือ" hidden>
+      <button class="workspace-back" id="backToToolPicker" type="button">← เครื่องมือทั้งหมด</button>
+      <div class="workspace-switcher-options">
+        <button type="button" data-open-tool="video" data-compact-tool="video">01 วิดีโอ → รูปภาพ</button>
+        <button type="button" data-open-tool="pdf" data-compact-tool="pdf">02 PDF → PNG</button>
+        <button type="button" data-open-tool="random" data-compact-tool="random">03 สุ่มชื่อไฟล์</button>
       </div>
     </section>
     <section class="tools-heading" aria-labelledby="toolsTitle">
@@ -66,8 +87,8 @@
       <p>เครื่องมือชุดแรก · เพิ่มประเภทการแปลงได้ในภายหลัง</p>
     </section>
 
-    <section class="tool-grid" aria-label="รายการเครื่องมือแปลงไฟล์">
-      <article class="tool-card tool-card--video" aria-labelledby="videoTitle">
+    <section class="tool-grid" id="toolWorkspace" aria-label="พื้นที่ทำงานของเครื่องมือ" hidden>
+      <article class="tool-card tool-card--video" data-tool-panel="video" aria-labelledby="videoTitle" hidden>
         <header class="tool-card-head">
           <div class="tool-icon" aria-hidden="true"><span>▶</span></div>
           <div class="tool-labels"><span>01 / VIDEO TO IMAGE</span><span class="tool-chip">MP4</span></div>
@@ -106,7 +127,7 @@
         </div>
       </article>
 
-      <article class="tool-card tool-card--pdf" aria-labelledby="pdfTitle">
+      <article class="tool-card tool-card--pdf" data-tool-panel="pdf" aria-labelledby="pdfTitle" hidden>
         <header class="tool-card-head">
           <div class="tool-icon" aria-hidden="true"><span>PDF</span></div>
           <div class="tool-labels"><span>02 / PDF TO IMAGE</span><span class="tool-chip">PDF</span></div>
@@ -149,7 +170,7 @@
         </div>
       </article>
 
-      <article class="tool-card tool-card--random" aria-labelledby="randomTitle">
+      <article class="tool-card tool-card--random" data-tool-panel="random" aria-labelledby="randomTitle" hidden>
         <header class="tool-card-head"><div class="tool-icon tool-icon--random" aria-hidden="true"><span>✳</span></div><div class="tool-labels"><span>03 / RANDOM RENAME</span><span class="tool-chip">BATCH</span></div></header>
         <div class="tool-copy"><h3 id="randomTitle">Random · สุ่มชื่อไฟล์</h3><p>เปลี่ยนชื่อไฟล์หลายรายการพร้อมกันด้วยชื่อแบบสุ่ม โดยคงนามสกุลเดิมไว้ ดูตัวอย่างชื่อใหม่ก่อน แล้วดาวน์โหลดไฟล์ทั้งหมดเป็น ZIP</p></div>
         <div class="upload-area">
@@ -170,7 +191,7 @@
       </article>
     </section>
 
-    <section class="privacy-note" aria-label="ข้อมูลความเป็นส่วนตัว">
+    <section class="privacy-note" id="privacyNote" aria-label="ข้อมูลความเป็นส่วนตัว" hidden>
       <span class="privacy-icon" aria-hidden="true">◎</span>
       <div><strong>ไฟล์ของคุณยังอยู่บนอุปกรณ์</strong><p>การแปลงทำงานในเบราว์เซอร์ของคุณ ไฟล์ต้นฉบับจะไม่ถูกส่งไปจัดเก็บบนเซิร์ฟเวอร์ ClassVerse ควรเปิดหน้านี้ด้วยเบราว์เซอร์ที่รองรับไฟล์วิดีโอและ PDF</p></div>
     </section>
