@@ -43,14 +43,14 @@
 <label class="search-field"><span class="visually-hidden">ค้นหาชื่อไฟล์</span><input id="searchInput" type="search" placeholder="ค้นหาชื่อไฟล์…" autocomplete="off"></label>
 <label class="page-size-field">แสดง <select id="pageSize"><option>24</option><option selected>48</option><option>96</option><option>192</option></select> รายการ</label>
 </div>
-<div class="bulk-actions"><button type="button" class="action-button action-button--primary" id="selectAll">เลือกทั้งหมด</button><button type="button" class="action-button" id="clearAll">ยกเลิกการเลือกทั้งหมด</button><button type="button" class="action-button action-button--export" id="exportZip" disabled>ดาวน์โหลด ZIP ที่เลือก ↓</button><button type="button" class="action-button action-button--download" id="exportFiles" disabled>ดาวน์โหลดไฟล์ที่เลือก ↓</button></div>
+<div class="bulk-actions"><button type="button" class="action-button action-button--primary" id="selectAll">เลือกทั้งหมด</button><button type="button" class="action-button" id="clearAll">ยกเลิกเลือกทั้งหมด</button><button type="button" class="action-button action-button--export" id="exportZip" disabled>ดาวน์โหลด ZIP ที่เลือก ↓</button><button type="button" class="action-button action-button--download" id="exportFiles" disabled>ดาวน์โหลดไฟล์ที่เลือก ↓</button></div>
 </div>
 <p class="status-line" id="statusLine" role="status" aria-live="polite">ยังไม่มีรูปภาพ กรุณาเลือกไฟล์เพื่อเริ่มต้น</p>
 <div class="image-list" id="imageList" aria-live="polite"></div>
 <div class="empty-state" id="emptyState"><span aria-hidden="true">▧</span><strong>ยังไม่มีรูปภาพในรายการ</strong><p>เพิ่มไฟล์เพื่อแสดงตัวอย่างและเริ่มเลือกภาพ</p></div>
 <nav class="pagination" aria-label="เปลี่ยนหน้ารายการรูปภาพ"><button type="button" id="previousPage" disabled>← ก่อนหน้า</button><span id="pageInfo">หน้า 1 / 1</span><button type="button" id="nextPage" disabled>ถัดไป →</button></nav>
 </section>
-<aside class="selection-footnote"><strong>การเลือกแยกอิสระ</strong><p>รายการและสถานะการเลือกในหน้านี้แยกจากอีกสองหน้า ไม่มีการใช้รายการ ZIP หรือสถานะการเลือกร่วมกัน</p></aside>
+<aside class="selection-footnote"><strong>การเลือกและชื่อไฟล์</strong><p>ปุ่มเลือกทั้งหมดและยกเลิกเลือกทั้งหมดมีผลกับภาพทุกรายการในหน้านี้ ไม่จำกัดเฉพาะหน้าที่กำลังแสดง การดาวน์โหลดแยกไฟล์จะคงชื่อภาพต้นฉบับ ส่วนภาพจากวิดีโอและ PDF จะใช้ชื่อไฟล์ต้นทางร่วมกับเลขลำดับเฟรมหรือหน้า</p></aside>
 </main>
 <footer class="shell page-footer"><span>CLASSVERSE · M.4/11</span><span>IMAGE SELECTION · OPTION 04</span><a href="../../">กลับหน้าหลัก ↗</a></footer>
 </body></html>
