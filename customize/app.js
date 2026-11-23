@@ -325,7 +325,7 @@ async function convertVideo() {
       await seekVideo(video, time);
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
       const blob = await canvasToBlob(canvas, mime, format === "jpg" ? 0.92 : undefined);
-      const frameName = "frame-" + String(index + 1).padStart(3, "0") + "." + extension;
+      const frameName = safeBaseName(file.name) + "_frame-" + String(index + 1).padStart(5, "0") + "." + extension;
       generatedImages.push({ name: frameName, blob, url: URL.createObjectURL(blob), selected: true });
       setProgress("videoProgress", ((index + 1) / times.length) * 90, true);
       setStatus("videoStatus", "กำลังสร้างภาพ " + (index + 1) + " / " + times.length, "working");
