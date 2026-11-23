@@ -195,3 +195,15 @@ label:has(input:focus), label:has(textarea:focus), label:has(select:focus) {
 .motion-checkmark path { fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 28; stroke-dashoffset: 28; animation: cv-check-draw 520ms var(--ease-out-expo) 80ms forwards; }
 @keyframes cv-check-draw { to { stroke-dashoffset: 0; } }
 .motion-feedback-error { animation: cv-feedback-in 420ms var(--ease-spring) both, cv-shake 360ms var(--ease-spring) 1; }
+
+
+/* Option 04 — file workshop */
+.service-card--customize {
+  grid-column: 1 / -1;
+  min-height: 220px;
+  background: #e8eadf;
+  border-color: #cbd0c1;
+}
+.service-card--customize .service-card__index { color: #718064; }
+.service-card--customize .service-card__link { color: #40513a; border-color: #cbd0c1; }
+.service-card--customize .service-status i { background: #718064; }
