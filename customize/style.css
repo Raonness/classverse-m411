@@ -118,3 +118,61 @@ body { background: var(--color-canvas); }
 .drop-label.is-dragover small {
   color: var(--color-brand);
 }
+
+
+/* Full-page drop target: visible anywhere while a file is dragged over the page. */
+.global-drop-overlay {
+  position: fixed;
+  inset: 12px;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  border: 2px dashed var(--color-brand);
+  border-radius: 18px;
+  background: rgba(242, 240, 232, .94);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .16s ease, visibility .16s ease;
+}
+.global-drop-overlay.is-visible {
+  opacity: 1;
+  visibility: visible;
+}
+.global-drop-panel {
+  width: min(100%, 440px);
+  display: grid;
+  justify-items: center;
+  gap: .65rem;
+  padding: clamp(1.5rem, 5vw, 3rem);
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  background: var(--color-paper);
+  box-shadow: 0 18px 60px rgba(25, 35, 25, .12);
+  text-align: center;
+}
+.global-drop-icon {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--color-brand);
+  font-size: 2rem;
+}
+.global-drop-panel strong {
+  color: var(--color-brand);
+  font-size: clamp(1.5rem, 5vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: -.04em;
+}
+.global-drop-panel > span:last-child {
+  color: var(--color-muted);
+  font-size: .82rem;
+  line-height: 1.7;
+}
+@media (prefers-reduced-motion: reduce) {
+  .global-drop-overlay { transition: none; }
+}
