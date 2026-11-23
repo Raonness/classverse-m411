@@ -9,6 +9,7 @@
     pdf:{title:"เลือกรูปภาพจาก PDF",heading:"ภาพที่แปลงจาก PDF",desc:"แปลงแต่ละหน้าในเอกสาร PDF เป็นภาพ แล้วเลือกเฉพาะหน้าที่ต้องการ",accept:"application/pdf,.pdf",picker:"เลือกไฟล์ PDF",help:"แต่ละหน้าของเอกสารจะกลายเป็นภาพ PNG",eyebrow:"SOURCE 03",input:"PDF"}
   }[mode];
   const $=id=>document.getElementById(id);
+  const EXPORT_ZIP_THRESHOLD=100;
   const state={items:[],selected:new Set(),page:0,pageSize:48,query:"",busy:false};
   const setStatus=(message,type)=>{const el=$("statusLine");el.textContent=message;el.dataset.state=type||""};
   const bytes=n=>{if(!n)return"0 B";const u=["B","KB","MB","GB"];const i=Math.min(Math.floor(Math.log(n)/Math.log(1024)),3);return(n/1024**i).toFixed(i?1:0)+" "+u[i]};
@@ -28,6 +29,7 @@
   function updateControls(){
     $("selectionCount").textContent="เลือกแล้ว "+state.selected.size.toLocaleString("th-TH")+" / "+state.items.length.toLocaleString("th-TH");
     $("exportSelected").disabled=!state.selected.size||state.busy;
+    $("exportSelected").textContent=state.selected.size>EXPORT_ZIP_THRESHOLD?"ดาวน์โหลด ZIP ที่เลือก ↓":"ดาวน์โหลดแยก ("+state.selected.size.toLocaleString("th-TH")+" ไฟล์) ↓";
     $("selectAll").disabled=!state.items.length||state.busy;
     $("clearAll").disabled=!state.selected.size||state.busy;
   }
@@ -116,15 +118,31 @@
   }
   async function exportSelected(){
     if(!state.selected.size||state.busy)return;
-    if(!window.JSZip){setStatus("โหลดระบบสร้าง ZIP ไม่สำเร็จ","error");return}
-    state.busy=true;updateControls();setStatus("กำลังเตรียมไฟล์ ZIP…","working");
+    const indices=Array.from(state.selected).sort((a,b)=>a-b);
+    state.busy=true;updateControls();
     try{
-      const zip=new JSZip();const indices=Array.from(state.selected).sort((a,b)=>a-b);
-      indices.forEach((index,position)=>{const item=state.items[index];zip.file(String(position+1).padStart(5,"0")+"-"+item.name,item.blob)});
-      const blob=await zip.generateAsync({type:"blob"},meta=>setStatus("กำลังบีบอัด "+Math.round(meta.percent)+"%","working"));
-      const url=URL.createObjectURL(blob);const link=document.createElement("a");link.href=url;link.download=mode+"-selected-images.zip";document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
-      setStatus("เตรียม ZIP แล้ว "+indices.length.toLocaleString("th-TH")+" ภาพ · "+bytes(blob.size),"success");
-    }catch(error){setStatus(error.message||"สร้าง ZIP ไม่สำเร็จ","error")}
+      if(indices.length<=EXPORT_ZIP_THRESHOLD){
+        setStatus("กำลังเตรียมดาวน์โหลดแยก "+indices.length.toLocaleString("th-TH")+" ไฟล์…","working");
+        // Keep each image as its own download; the numeric prefix prevents filename collisions.
+        indices.forEach((index,position)=>{
+          const item=state.items[index];
+          const link=document.createElement("a");
+          link.href=item.url;
+          link.download=String(position+1).padStart(5,"0")+"-"+item.name;
+          link.style.display="none";
+          document.body.append(link);link.click();link.remove();
+        });
+        setStatus("ส่งคำขอดาวน์โหลดแยกแล้ว "+indices.length.toLocaleString("th-TH")+" ไฟล์ · เบราว์เซอร์อาจขออนุญาตดาวน์โหลดหลายไฟล์","success");
+      }else{
+        if(!window.JSZip)throw new Error("โหลดระบบสร้าง ZIP ไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่");
+        setStatus("มีมากกว่า 100 ไฟล์ · กำลังเตรียม ZIP…","working");
+        const zip=new JSZip();
+        indices.forEach((index,position)=>{const item=state.items[index];zip.file(String(position+1).padStart(5,"0")+"-"+item.name,item.blob)});
+        const blob=await zip.generateAsync({type:"blob"},meta=>setStatus("กำลังบีบอัด "+Math.round(meta.percent)+"%","working"));
+        const url=URL.createObjectURL(blob);const link=document.createElement("a");link.href=url;link.download=mode+"-selected-images.zip";document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
+        setStatus("เตรียม ZIP แล้ว "+indices.length.toLocaleString("th-TH")+" ภาพ · "+bytes(blob.size),"success");
+      }
+    }catch(error){setStatus(error.message||"ไม่สามารถดาวน์โหลดไฟล์ได้","error")}
     finally{state.busy=false;updateControls()}
   }
   $("sourceFiles").addEventListener("change",event=>{const files=event.target.files;handleFiles(files);event.target.value="";});
