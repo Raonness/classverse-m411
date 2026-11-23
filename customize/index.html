@@ -20,7 +20,7 @@
     <div class="global-drop-panel">
       <span class="global-drop-icon" aria-hidden="true">↓</span>
       <strong>วางไฟล์ที่นี่</strong>
-      <span>ปล่อยไฟล์ MP4 หรือ PDF ได้ทุกบริเวณของหน้าเว็บ</span>
+      <span>ปล่อยไฟล์ลงบนหน้าเว็บได้ · MP4 / PDF หรือไฟล์หลายรายการสำหรับ Random</span>
     </div>
   </div>
   <a class="skip-link" href="#main-content">ข้ามไปยังเครื่องมือ</a>
@@ -150,7 +150,7 @@
           <div class="field"><label for="randomNameLength">ความยาวชื่อสุ่ม</label><select id="randomNameLength"><option value="8">8 ตัวอักษร</option><option value="12" selected>12 ตัวอักษร</option><option value="16">16 ตัวอักษร</option><option value="20">20 ตัวอักษร</option></select></div>
           <button class="secondary-button" id="randomizeNames" type="button" disabled>สุ่มชื่อใหม่อีกครั้ง ↻</button>
         </div>
-        <div class="random-preview" id="randomPreview" hidden><div class="random-preview-head"><strong>ตัวอย่างชื่อไฟล์</strong><span id="randomCount">0 ไฟล์</span></div><ul class="random-file-list" id="randomFileList"></ul></div>
+        <div class="random-preview" id="randomPreview" hidden><div class="random-preview-head"><strong>เลือกไฟล์ที่จะส่งออก</strong><span id="randomCount">0 / 0 ไฟล์</span></div><div class="random-selection-actions"><button class="text-button" id="selectAllRandom" type="button">เลือกทั้งหมด</button><button class="text-button" id="clearRandomSelection" type="button">ไม่เลือกทั้งหมด</button></div><p class="random-selection-help">ติ๊กเลือกเฉพาะไฟล์ที่ต้องการรวมไว้ใน ZIP</p><ul class="random-file-list" id="randomFileList"></ul></div>
         <div class="tool-actions">
           <button class="primary-button" id="downloadRandomZip" type="button" disabled>ดาวน์โหลดไฟล์ที่เปลี่ยนชื่อแล้ว <span aria-hidden="true">↗</span></button>
           <p class="status" id="randomStatus" role="status" aria-live="polite">เลือกไฟล์เพื่อเริ่มต้น</p>
