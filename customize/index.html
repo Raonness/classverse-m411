@@ -90,9 +90,9 @@
           <button class="primary-button" id="convertVideo" type="button" disabled>แปลงเป็นรูปภาพ <span aria-hidden="true">↗</span></button>
           <p class="status" id="videoStatus" role="status" aria-live="polite">เลือกไฟล์เพื่อเริ่มต้น</p>
           <progress class="progress" id="videoProgress" max="100" value="0" aria-label="ความคืบหน้าการแปลงวิดีโอ" hidden></progress>
-          <div class="result" id="videoResult" hidden>
-            <div><strong id="videoResultTitle">แปลงไฟล์สำเร็จ</strong><small id="videoResultMeta"></small></div>
-            <a class="download-button" id="videoDownload" href="#" download>ดาวน์โหลด ZIP ↓</a>
+          <div class="result result--stacked" id="videoResult" hidden>
+            <div class="result-summary"><div><strong id="videoResultTitle">แปลงวิดีโอสำเร็จ</strong><small id="videoResultMeta"></small></div><button class="download-button" id="videoDownload" type="button" disabled>สร้าง ZIP จากภาพที่เลือก ↓</button></div>
+            <section class="image-review" aria-label="ตัวอย่างภาพจากวิดีโอ"><div class="image-review-heading"><strong>ตรวจสอบและเลือกรูปภาพ</strong><span id="videoSelectionCount">0 / 0 ภาพ</span></div><p>เลือกเฉพาะภาพที่ต้องการใส่ใน ZIP ได้ก่อนส่งออก</p><div class="image-gallery" id="videoGallery"></div><div class="gallery-pagination"><button type="button" id="videoPrevPage" class="text-button">← ก่อนหน้า</button><span id="videoPageInfo">หน้า 1</span><button type="button" id="videoNextPage" class="text-button">ถัดไป →</button></div></section>
           </div>
         </div>
       </article>
@@ -133,9 +133,9 @@
           <button class="primary-button" id="convertPdf" type="button" disabled>แปลงเป็น PNG <span aria-hidden="true">↗</span></button>
           <p class="status" id="pdfStatus" role="status" aria-live="polite">เลือกไฟล์เพื่อเริ่มต้น</p>
           <progress class="progress" id="pdfProgress" max="100" value="0" aria-label="ความคืบหน้าการแปลง PDF" hidden></progress>
-          <div class="result" id="pdfResult" hidden>
-            <div><strong id="pdfResultTitle">แปลงไฟล์สำเร็จ</strong><small id="pdfResultMeta"></small></div>
-            <a class="download-button" id="pdfDownload" href="#" download>ดาวน์โหลด ZIP ↓</a>
+          <div class="result result--stacked" id="pdfResult" hidden>
+            <div class="result-summary"><div><strong id="pdfResultTitle">แปลง PDF สำเร็จ</strong><small id="pdfResultMeta"></small></div><button class="download-button" id="pdfDownload" type="button" disabled>สร้าง ZIP จากภาพที่เลือก ↓</button></div>
+            <section class="image-review" aria-label="ตัวอย่างภาพจาก PDF"><div class="image-review-heading"><strong>ตรวจสอบและเลือกรูปภาพ</strong><span id="pdfSelectionCount">0 / 0 ภาพ</span></div><p>เลือกเฉพาะหน้าที่ต้องการใส่ใน ZIP ได้ก่อนส่งออก</p><div class="image-gallery" id="pdfGallery"></div><div class="gallery-pagination"><button type="button" id="pdfPrevPage" class="text-button">← ก่อนหน้า</button><span id="pdfPageInfo">หน้า 1</span><button type="button" id="pdfNextPage" class="text-button">ถัดไป →</button></div></section>
           </div>
         </div>
       </article>
@@ -145,14 +145,14 @@
         <div class="tool-copy"><h3 id="randomTitle">Random · สุ่มชื่อไฟล์</h3><p>เปลี่ยนชื่อไฟล์หลายรายการพร้อมกันด้วยชื่อแบบสุ่ม โดยคงนามสกุลเดิมไว้ ดูตัวอย่างชื่อใหม่ก่อน แล้วดาวน์โหลดไฟล์ทั้งหมดเป็น ZIP</p></div>
         <div class="upload-area">
           <input class="file-input" id="randomFiles" type="file" multiple aria-describedby="randomFileHelp">
-          <label class="drop-label" for="randomFiles" id="randomDropLabel"><span class="upload-symbol" aria-hidden="true">＋</span><strong>เลือกไฟล์หลายรายการ</strong><small id="randomFileHelp">คลิกเพื่อเลือกหลายไฟล์ หรือ ลากไฟล์มาวางที่นี่</small></label>
+          <label class="drop-label" for="randomFiles" id="randomDropLabel"><span class="upload-symbol" aria-hidden="true">＋</span><strong>เลือกไฟล์หลายรายการ</strong><small id="randomFileHelp">เลือกได้หลายไฟล์พร้อมกัน รองรับชุดไฟล์ขนาดใหญ่ (มากกว่า 9,999 ไฟล์ได้ตามข้อจำกัดของอุปกรณ์) หรือ ลากมาวางที่นี่</small></label>
           <p class="selected-file" id="randomFileName">ยังไม่ได้เลือกไฟล์</p>
         </div>
         <div class="random-options">
           <div class="field"><label for="randomNameLength">ความยาวชื่อสุ่ม</label><select id="randomNameLength"><option value="8">8 ตัวอักษร</option><option value="12" selected>12 ตัวอักษร</option><option value="16">16 ตัวอักษร</option><option value="20">20 ตัวอักษร</option></select></div>
           <button class="secondary-button" id="randomizeNames" type="button" disabled>สุ่มชื่อใหม่อีกครั้ง ↻</button>
         </div>
-        <div class="random-preview" id="randomPreview" hidden><div class="random-preview-head"><strong>เลือกไฟล์ที่จะส่งออก</strong><span id="randomCount">0 / 0 ไฟล์</span></div><div class="random-selection-actions"><button class="text-button" id="selectAllRandom" type="button">เลือกทั้งหมด</button><button class="text-button" id="clearRandomSelection" type="button">ไม่เลือกทั้งหมด</button></div><p class="random-selection-help">ติ๊กเลือกเฉพาะไฟล์ที่ต้องการรวมไว้ใน ZIP</p><ul class="random-file-list" id="randomFileList"></ul></div>
+        <div class="random-preview" id="randomPreview" hidden><div class="random-preview-head"><strong>เลือกไฟล์ที่จะส่งออก</strong><span id="randomCount">0 / 0 ไฟล์</span></div><div class="random-selection-actions"><button class="text-button" id="selectAllRandom" type="button">เลือกทั้งหมด</button><button class="text-button" id="clearRandomSelection" type="button">ไม่เลือกทั้งหมด</button></div><p class="random-selection-help">ติ๊กเลือกเฉพาะไฟล์ที่ต้องการรวมไว้ใน ZIP</p><ul class="random-file-list" id="randomFileList"></ul><div class="gallery-pagination"><button type="button" id="randomPrevPage" class="text-button">← ก่อนหน้า</button><span id="randomPageInfo">หน้า 1 / 1</span><button type="button" id="randomNextPage" class="text-button">ถัดไป →</button></div></div>
         <div class="tool-actions">
           <button class="primary-button" id="downloadRandomZip" type="button" disabled>ดาวน์โหลดไฟล์ที่เปลี่ยนชื่อแล้ว <span aria-hidden="true">↗</span></button>
           <p class="status" id="randomStatus" role="status" aria-live="polite">เลือกไฟล์เพื่อเริ่มต้น</p>
