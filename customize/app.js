@@ -529,6 +529,7 @@ attachGlobalDropTarget();
 
 
 function createRandomFilename(length, extension, usedNames) {
+  if (![12, 16, 20].includes(Number(length))) throw new Error("เลือกความยาวชื่อสุ่มได้ 12, 16 หรือ 20 ตัวอักษรเท่านั้น");
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
   const bytes = new Uint8Array(length);
   let candidate;
