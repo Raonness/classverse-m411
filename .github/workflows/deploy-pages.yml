@@ -36,6 +36,15 @@ jobs:
           const fs = require('node:fs');
           const path = 'assets/data/version.json';
           const data = JSON.parse(fs.readFileSync(path, 'utf8'));
+          const { execFileSync } = require('node:child_process');
+          const sourceCommit = process.env.SOURCE_COMMIT;
+          const subject = execFileSync('git', ['log', '-1', '--format=%s', sourceCommit], { encoding: 'utf8' }).trim();
+          if (subject.includes('[manual-version]')) {
+            data.sourceCommit = sourceCommit;
+            fs.writeFileSync(path, JSON.stringify(data, null, 2) + '\n');
+            console.log('Keeping manually assigned ClassVerse version ' + data.version);
+            process.exit(0);
+          }
           if (data.sourceCommit === process.env.SOURCE_COMMIT) {
             console.log('Version already recorded for this source commit.');
             process.exit(0);
@@ -45,9 +54,6 @@ jobs:
           parts[4] = (parts[4] || 0) + 1;
           const version = parts.slice(0, 5).join('.');
           const date = new Date().toISOString().slice(0, 10);
-          const { execFileSync } = require('node:child_process');
-          const sourceCommit = process.env.SOURCE_COMMIT;
-          const subject = execFileSync('git', ['log', '-1', '--format=%s', sourceCommit], { encoding: 'utf8' }).trim();
           const previousCommit = data.sourceCommit;
           let changedFiles = [];
           if (previousCommit && previousCommit !== sourceCommit) {
