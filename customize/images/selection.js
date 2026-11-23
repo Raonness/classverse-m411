@@ -28,8 +28,10 @@
   }
   function updateControls(){
     $("selectionCount").textContent="เลือกแล้ว "+state.selected.size.toLocaleString("th-TH")+" / "+state.items.length.toLocaleString("th-TH");
-    $("exportSelected").disabled=!state.selected.size||state.busy;
-    $("exportSelected").textContent=state.selected.size>EXPORT_ZIP_THRESHOLD?"ดาวน์โหลด ZIP ที่เลือก ↓":"ดาวน์โหลดแยก ("+state.selected.size.toLocaleString("th-TH")+" ไฟล์) ↓";
+    $("exportZip").disabled=!state.selected.size||state.busy;
+    $("exportFiles").disabled=!state.selected.size||state.busy;
+    $("exportZip").textContent="ดาวน์โหลด ZIP ("+state.selected.size.toLocaleString("th-TH")+" ภาพ) ↓";
+    $("exportFiles").textContent="ดาวน์โหลดไฟล์แยก ("+state.selected.size.toLocaleString("th-TH")+" ไฟล์) ↓";
     $("selectAll").disabled=!state.items.length||state.busy;
     $("clearAll").disabled=!state.selected.size||state.busy;
   }
@@ -116,39 +118,49 @@
     catch(error){setStatus(error.message||"ไม่สามารถแปลงไฟล์ได้","error")}
     finally{state.busy=false;render()}
   }
-  async function exportSelected(){
+  async function exportZip(){
     if(!state.selected.size||state.busy)return;
     const indices=Array.from(state.selected).sort((a,b)=>a-b);
     state.busy=true;updateControls();
     try{
-      if(indices.length<=EXPORT_ZIP_THRESHOLD){
-        setStatus("กำลังเตรียมดาวน์โหลดแยก "+indices.length.toLocaleString("th-TH")+" ไฟล์…","working");
-        // Keep each image as its own download; the numeric prefix prevents filename collisions.
-        indices.forEach((index,position)=>{
-          const item=state.items[index];
-          const link=document.createElement("a");
-          link.href=item.url;
-          link.download=String(position+1).padStart(5,"0")+"-"+item.name;
-          link.style.display="none";
-          document.body.append(link);link.click();link.remove();
-        });
-        setStatus("ส่งคำขอดาวน์โหลดแยกแล้ว "+indices.length.toLocaleString("th-TH")+" ไฟล์ · เบราว์เซอร์อาจขออนุญาตดาวน์โหลดหลายไฟล์","success");
-      }else{
-        if(!window.JSZip)throw new Error("โหลดระบบสร้าง ZIP ไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่");
-        setStatus("มีมากกว่า 100 ไฟล์ · กำลังเตรียม ZIP…","working");
-        const zip=new JSZip();
-        indices.forEach((index,position)=>{const item=state.items[index];zip.file(String(position+1).padStart(5,"0")+"-"+item.name,item.blob)});
-        const blob=await zip.generateAsync({type:"blob"},meta=>setStatus("กำลังบีบอัด "+Math.round(meta.percent)+"%","working"));
-        const url=URL.createObjectURL(blob);const link=document.createElement("a");link.href=url;link.download=mode+"-selected-images.zip";document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
-        setStatus("เตรียม ZIP แล้ว "+indices.length.toLocaleString("th-TH")+" ภาพ · "+bytes(blob.size),"success");
+      if(!window.JSZip)throw new Error("โหลดระบบสร้าง ZIP ไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่");
+      setStatus("กำลังเตรียม ZIP จาก "+indices.length.toLocaleString("th-TH")+" ภาพ…","working");
+      const zip=new JSZip();
+      indices.forEach((index,position)=>{const item=state.items[index];zip.file(String(position+1).padStart(5,"0")+"-"+item.name,item.blob)});
+      const blob=await zip.generateAsync({type:"blob"},meta=>setStatus("กำลังบีบอัด "+Math.round(meta.percent)+"%","working"));
+      const url=URL.createObjectURL(blob);const link=document.createElement("a");link.href=url;link.download=mode+"-selected-images.zip";document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
+      setStatus("เตรียม ZIP แล้ว "+indices.length.toLocaleString("th-TH")+" ภาพ · "+bytes(blob.size),"success");
+    }catch(error){setStatus(error.message||"ไม่สามารถสร้าง ZIP ได้","error")}
+    finally{state.busy=false;updateControls()}
+  }
+  async function exportFiles(){
+    if(!state.selected.size||state.busy)return;
+    const indices=Array.from(state.selected).sort((a,b)=>a-b);
+    state.busy=true;updateControls();
+    try{
+      setStatus("กำลังส่งไฟล์ที่เลือกไปยังการดาวน์โหลด…","working");
+      for(let position=0;position<indices.length;position++){
+        const item=state.items[indices[position]];
+        const link=document.createElement("a");
+        link.href=item.url;
+        link.download=String(position+1).padStart(5,"0")+"-"+item.name;
+        link.style.display="none";
+        document.body.append(link);link.click();link.remove();
+        if(position%20===19){
+          setStatus("ส่งคำขอดาวน์โหลดแล้ว "+(position+1).toLocaleString("th-TH")+" / "+indices.length.toLocaleString("th-TH")+" ไฟล์","working");
+          await new Promise(resolve=>setTimeout(resolve,250));
+        }else{
+          await new Promise(resolve=>setTimeout(resolve,80));
+        }
       }
+      setStatus("ส่งคำขอดาวน์โหลดแยกครบ "+indices.length.toLocaleString("th-TH")+" ไฟล์แล้ว · เบราว์เซอร์อาจจำกัดการดาวน์โหลดหลายไฟล์","success");
     }catch(error){setStatus(error.message||"ไม่สามารถดาวน์โหลดไฟล์ได้","error")}
     finally{state.busy=false;updateControls()}
   }
   $("sourceFiles").addEventListener("change",event=>{const files=event.target.files;handleFiles(files);event.target.value="";});
   $("selectAll").addEventListener("click",()=>{state.items.forEach((_,index)=>state.selected.add(index));render();setStatus("เลือกภาพทั้งหมดแล้ว")});
   $("clearAll").addEventListener("click",()=>{state.selected.clear();render();setStatus("ยกเลิกการเลือกทั้งหมดแล้ว")});
-  $("exportSelected").addEventListener("click",exportSelected);
+  $("exportZip").addEventListener("click",exportZip);\n  $("exportFiles").addEventListener("click",exportFiles);
   $("searchInput").addEventListener("input",event=>{state.query=event.target.value;state.page=0;render()});
   $("pageSize").addEventListener("change",event=>{state.pageSize=Number(event.target.value)||48;state.page=0;render()});
   $("previousPage").addEventListener("click",()=>{state.page--;render()});$("nextPage").addEventListener("click",()=>{state.page++;render()});
