@@ -247,3 +247,47 @@ body { background: var(--color-canvas); }
 .selection-shortcut-grid a strong{font-size:1rem;font-weight:600}
 .selection-shortcut-grid a small{color:var(--color-muted);font-size:.7rem}
 @media(max-width:700px){.selection-shortcut-grid{grid-template-columns:1fr}.selection-shortcut-grid a{min-height:112px}}
+
+
+/* Tool picker and focused workspaces */
+.tool-picker { padding: 1.5rem 0 3.5rem; border-top: 1px solid var(--color-line); }
+.tool-picker-heading { max-width: 650px; margin-bottom: 1.35rem; }
+.tool-picker-heading .eyebrow { margin-bottom: .4rem; }
+.tool-picker-heading h2 { margin: 0; font-size: clamp(1.6rem, 3.4vw, 2.25rem); font-weight: 600; letter-spacing: -.045em; }
+.tool-picker-heading h2 span { color: var(--color-muted); font-weight: 400; }
+.tool-picker-heading > p:last-child { margin: .45rem 0 0; color: var(--color-muted); font-size: .8rem; line-height: 1.75; }
+.tool-picker-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.tool-choice { position: relative; min-height: 210px; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-end; gap: .45rem; padding: 1.25rem; overflow: hidden; border: 1px solid var(--color-line); border-top: 3px solid var(--color-brand); border-radius: 4px 18px 4px 4px; color: var(--color-ink); background: var(--color-paper); text-align: left; cursor: pointer; transition: transform .22s ease, border-color .22s ease, background .22s ease;
+}
+.tool-choice:hover { transform: translateY(-4px); border-color: var(--color-brand); background: #f8f7f0; }
+.tool-choice:focus-visible, .workspace-switcher button:focus-visible { outline: 3px solid var(--color-accent); outline-offset: 3px; }
+.tool-choice--pdf { border-top-color: #8f5139; }
+.tool-choice--random { border-top-color: #9a7440; }
+.tool-choice-number { position: absolute; top: 1rem; right: 1.1rem; color: var(--color-muted); font: 700 .68rem var(--font-display); letter-spacing: .12em; }
+.tool-choice-icon { width: 48px; height: 48px; display: grid; place-items: center; margin-bottom: auto; border-radius: 4px 13px 4px 4px; color: #fff; background: var(--color-brand); font: 800 1.1rem var(--font-display); }
+.tool-choice--pdf .tool-choice-icon { background: #8f5139; font-size: .7rem; }
+.tool-choice--random .tool-choice-icon { background: #9a7440; }
+.tool-choice strong { font-size: 1rem; font-weight: 650; }
+.tool-choice small { color: var(--color-muted); font: 700 .58rem var(--font-display); letter-spacing: .1em; }
+.tool-choice-arrow { position: absolute; right: 1.1rem; bottom: 1.15rem; color: var(--color-brand); font-size: 1.1rem; transition: transform .2s ease; }
+.tool-choice:hover .tool-choice-arrow { transform: translate(3px, -3px); }
+.workspace-switcher { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .8rem; padding: 1rem 0; border-top: 1px solid var(--color-line); }
+.workspace-back { padding: .55rem .75rem; border: 1px solid var(--color-line); color: var(--color-brand); background: var(--color-paper); font-size: .75rem; font-weight: 600; cursor: pointer; }
+.workspace-switcher-options { display: flex; flex-wrap: wrap; gap: .45rem; }
+.workspace-switcher-options button { padding: .48rem .65rem; border: 1px solid var(--color-line); border-radius: 2px; color: var(--color-muted); background: transparent; font-size: .68rem; cursor: pointer; transition: color .2s, border-color .2s, background .2s; }
+.workspace-switcher-options button:hover, .workspace-switcher-options button[aria-current="page"] { border-color: var(--color-brand); color: var(--color-brand); background: var(--color-brand-soft); }
+.tool-grid[hidden], .tool-card[hidden], .tool-picker[hidden], .workspace-switcher[hidden], .privacy-note[hidden] { display: none !important; }
+.tool-grid { grid-template-columns: minmax(0, 1fr); padding-bottom: 1rem; }
+.tool-card { animation: workspace-enter .28s ease both; }
+@keyframes workspace-enter { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 760px) {
+  .tool-picker-grid { grid-template-columns: 1fr; }
+  .tool-choice { min-height: 150px; }
+  .workspace-switcher { align-items: flex-start; flex-direction: column; }
+  .workspace-switcher-options { width: 100%; }
+  .workspace-switcher-options button { flex: 1 1 auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tool-choice, .tool-choice-arrow { transition: none; }
+  .tool-card { animation: none; }
+}
